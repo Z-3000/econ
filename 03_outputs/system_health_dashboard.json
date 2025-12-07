@@ -1,0 +1,555 @@
+{
+  "dashboard": {
+    "uid": "system-health-raspi5",
+    "title": "시스템 헬스 모니터링 (Raspberry Pi)",
+    "tags": [
+      "system",
+      "telegraf",
+      "raspi"
+    ],
+    "timezone": "Asia/Seoul",
+    "refresh": "1m",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "CPU 사용률",
+        "type": "gauge",
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 4,
+          "h": 6
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"cpu\")\n  |> filter(fn: (r) => r._field == \"usage_idle\")\n  |> last()\n  |> map(fn: (r) => ({r with _value: 100.0 - r._value}))\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "orange",
+                  "value": 70
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 2,
+        "title": "메모리 사용률",
+        "type": "gauge",
+        "gridPos": {
+          "x": 4,
+          "y": 0,
+          "w": 4,
+          "h": 6
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"mem\")\n  |> filter(fn: (r) => r._field == \"used_percent\")\n  |> last()\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 60
+                },
+                {
+                  "color": "orange",
+                  "value": 80
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "디스크 사용률 (rootfs)",
+        "type": "gauge",
+        "gridPos": {
+          "x": 8,
+          "y": 0,
+          "w": 4,
+          "h": 6
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"disk\")\n  |> filter(fn: (r) => r._field == \"used_percent\")\n  |> filter(fn: (r) => r.path == \"/\")\n  |> last()\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 60
+                },
+                {
+                  "color": "orange",
+                  "value": 80
+                },
+                {
+                  "color": "red",
+                  "value": 90
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "CPU 온도",
+        "type": "gauge",
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 4,
+          "h": 6
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"cpu_temp\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> last()\n  |> map(fn: (r) => ({r with _value: r._value / 1000.0}))\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "celsius",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "orange",
+                  "value": 65
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "시스템 업타임",
+        "type": "stat",
+        "gridPos": {
+          "x": 16,
+          "y": 0,
+          "w": 4,
+          "h": 6
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"system\")\n  |> filter(fn: (r) => r._field == \"uptime\")\n  |> last()\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "textMode": "value"
+        }
+      },
+      {
+        "id": 6,
+        "title": "디스크 여유 (WD4T)",
+        "type": "stat",
+        "gridPos": {
+          "x": 20,
+          "y": 0,
+          "w": 4,
+          "h": 6
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"disk\")\n  |> filter(fn: (r) => r._field == \"free\")\n  |> filter(fn: (r) => r.path == \"/raspi/WD4T\")\n  |> last()\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 107374182400
+                },
+                {
+                  "color": "green",
+                  "value": 536870912000
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "colorMode": "value",
+          "graphMode": "none"
+        }
+      },
+      {
+        "id": 7,
+        "title": "CPU 사용률 추이",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 6,
+          "w": 8,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cpu\")\n  |> filter(fn: (r) => r._field == \"usage_idle\")\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _value: 100.0 - r._value, _field: \"사용률\"}))\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20,
+              "lineWidth": 2
+            },
+            "color": {
+              "fixedColor": "blue",
+              "mode": "fixed"
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "메모리 사용량 추이",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 8,
+          "y": 6,
+          "w": 8,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"mem\")\n  |> filter(fn: (r) => r._field == \"used\" or r._field == \"available\")\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20,
+              "lineWidth": 2,
+              "stacking": {
+                "mode": "normal"
+              }
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "used"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "orange",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "available"
+              },
+              "properties": [
+                {
+                  "id": "color",
+                  "value": {
+                    "fixedColor": "green",
+                    "mode": "fixed"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": 9,
+        "title": "CPU 온도 추이",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 16,
+          "y": 6,
+          "w": 8,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cpu_temp\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n  |> map(fn: (r) => ({r with _value: r._value / 1000.0, _field: \"온도\"}))\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "celsius",
+            "min": 30,
+            "max": 85,
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20,
+              "lineWidth": 2
+            },
+            "color": {
+              "fixedColor": "red",
+              "mode": "fixed"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow",
+                  "value": 50
+                },
+                {
+                  "color": "orange",
+                  "value": 65
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "네트워크 트래픽",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 0,
+          "y": 14,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"net\")\n  |> filter(fn: (r) => r._field == \"bytes_recv\" or r._field == \"bytes_sent\")\n  |> filter(fn: (r) => r.interface == \"eth0\" or r.interface == \"tailscale0\")\n  |> derivative(unit: 1s, nonNegative: true)\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "Bps",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20,
+              "lineWidth": 2
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "디스크 I/O (SD카드)",
+        "type": "timeseries",
+        "gridPos": {
+          "x": 12,
+          "y": 14,
+          "w": 12,
+          "h": 8
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"diskio\")\n  |> filter(fn: (r) => r._field == \"read_bytes\" or r._field == \"write_bytes\")\n  |> derivative(unit: 1s, nonNegative: true)\n  |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)\n            ",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "Bps",
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20,
+              "lineWidth": 2
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      }
+    ]
+  },
+  "folderId": 0,
+  "overwrite": true
+}

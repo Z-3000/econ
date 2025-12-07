@@ -1,0 +1,141 @@
+# ==============================================
+# API 키 / 환경변수 (절대 커밋 금지!)
+# ==============================================
+.env
+*.env
+.env.*
+!.env.example
+credentials*
+api_key*
+*_secret*
+*_token*
+
+# ==============================================
+# 로그 파일
+# ==============================================
+98_logs/
+logs/
+*.log
+
+# ==============================================
+# Python 캐시
+# ==============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==============================================
+# Jupyter Notebook
+# ==============================================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ==============================================
+# 가상환경
+# ==============================================
+venv/
+env/
+.venv/
+.env/
+ENV/
+
+# ==============================================
+# IDE / 에디터
+# ==============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# ==============================================
+# 운영체제
+# ==============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+System Volume Information/
+
+# ==============================================
+# 대용량 데이터 (선택적)
+# ==============================================
+# 원본 데이터는 GitHub에 올리지 않음 (용량 문제)
+# 필요시 아래 주석 해제
+# 00_data_raw/
+# 00-1_data_processed/
+# data/
+
+# ==============================================
+# Grafana 대시보드 JSON (선택적)
+# ==============================================
+# 03_outputs/grafana_*.json
+
+# ==============================================
+# 임시 파일
+# ==============================================
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ==============================================
+# 테스트/디버깅 스크립트 (포트폴리오에 불필요)
+# ==============================================
+01_scripts/check_*.py
+01_scripts/test_*.py
+01_scripts/collect_gdp_only.py
+01_scripts/collect_historical_data.py
+01_scripts/collect_historical_news.py
+01_scripts/create_grafana_dashboard.py
+01_scripts/grafana_dashboard_setup.py
+01_scripts/influxdb_loader_v2.py
+
+# ==============================================
+# 개인 문서 (포트폴리오에 불필요)
+# ==============================================
+99_docs/00_*.md
+99_docs/01_*.md
+99_docs/02_*.md
+99_docs/03_*.md
+99_docs/SESSION_*.md
+99_docs/raspi_influxdb_context.md
+99_docs/PORTFOLIO_SLIDE.md
+99_docs/PORTFOLIO_SLIDE.pptx
+
+# ==============================================
+# Windows/시스템 폴더
+# ==============================================
+System Volume Information/
+$RECYCLE.BIN/
+
+# ==============================================
+# Claude Code 관련 (AI 작업 지침)
+# ==============================================
+.claude/
+CLAUDE.md
+.claudeignore

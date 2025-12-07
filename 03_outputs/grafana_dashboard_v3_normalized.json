@@ -1,0 +1,2421 @@
+{
+  "dashboard": {
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 7,
+    "links": [],
+    "panels": [
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        },
+        "id": 1,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) => r.name == \"코스피\" or r.name == \"코스닥\" or r.name == \"KODEX200\")\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n            ",
+            "refId": "A"
+          }
+        ],
+        "title": "한국 주가지수/ETF",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        },
+        "id": 2,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) => r.name == \"S&P500\" or r.name == \"나스닥\" or r.name == \"QQQ\" or r.name == \"SPY\" or r.name == \"DIA\")\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n            ",
+            "refId": "A"
+          }
+        ],
+        "title": "미국 주가지수/ETF",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        },
+        "id": 3,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"economic_indicators\")\n  |> filter(fn: (r) => r.indicator =~ /한국 GDP.*실질.*전기비/ or r.indicator =~ /한국 GDP.*실질.*전년동기비/)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 3mo, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.indicator }))\n  |> drop(columns: [\"indicator\", \"series_id\", \"period\"])\n                ",
+            "refId": "GDP"
+          },
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"economic_indicators\")\n  |> filter(fn: (r) => r.indicator == \"미국 산업생산지수\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 1mo, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.indicator }))\n  |> drop(columns: [\"indicator\", \"series_id\", \"period\"])\n                ",
+            "refId": "IND"
+          }
+        ],
+        "title": "한국 경기 (실질GDP 성장률·산업생산)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "short"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        },
+        "id": 4,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"economic_indicators\")\n  |> filter(fn: (r) => r.indicator == \"한국 소비자물가지수\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 1mo, fn: last, createEmpty: false)\n                |> map(fn: (r) => ({ r with _field: r.indicator }))\n                |> drop(columns: [\"indicator\", \"series_id\", \"period\"])\n                ",
+            "refId": "KR_CPI"
+          },
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"economic_indicators\")\n  |> filter(fn: (r) => r.indicator == \"미국 CPI\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 1mo, fn: last, createEmpty: false)\n                |> map(fn: (r) => ({ r with _field: r.indicator }))\n                |> drop(columns: [\"indicator\", \"series_id\", \"period\"])\n                ",
+            "refId": "US_CPI"
+          }
+        ],
+        "title": "물가 (한국·미국 CPI)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "never",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            },
+            "unit": "percent"
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        },
+        "id": 5,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"economic_indicators\")\n  |> filter(fn: (r) => r.indicator == \"연방기금금리\" or r.indicator == \"미국 10년 국채금리\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.indicator }))\n  |> drop(columns: [\"indicator\", \"series_id\", \"period\"])\n            ",
+            "refId": "A"
+          }
+        ],
+        "title": "미국 금리 (연방기금금리 vs 10년 국채)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "USD/KRW 환율"
+              },
+              "properties": [
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "left"
+                },
+                {
+                  "id": "unit",
+                  "value": "short"
+                }
+              ]
+            },
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "미국 10년 국채금리"
+              },
+              "properties": [
+                {
+                  "id": "custom.axisPlacement",
+                  "value": "right"
+                },
+                {
+                  "id": "unit",
+                  "value": "percent"
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        },
+        "id": 6,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"economic_indicators\")\n  |> filter(fn: (r) => r.indicator == \"USD/KRW 환율\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.indicator }))\n  |> drop(columns: [\"indicator\", \"series_id\", \"period\"])\n                ",
+            "refId": "FX"
+          },
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"economic_indicators\")\n  |> filter(fn: (r) => r.indicator == \"미국 10년 국채금리\")\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _value: r._value * 100.0, _field: r.indicator }))\n  |> drop(columns: [\"indicator\", \"series_id\", \"period\"])\n                ",
+            "refId": "US10Y"
+          }
+        ],
+        "title": "환율 (USD/KRW) + 미국 10년물 금리",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 24
+        },
+        "id": 7,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) => r.name == \"NAVER\" or r.name == \"카카오\")\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n            |> map(fn: (r) => ({ r with _field: r.name }))\n            |> drop(columns: [\"name\", \"ticker\"])\n            ",
+            "refId": "A"
+          }
+        ],
+        "title": "IT 플랫폼 (NAVER·카카오)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 24
+        },
+        "id": 8,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) => r.name == \"HYBE\" or r.name == \"SM\" or r.name == \"JYP Ent.\" or r.name == \"크래프톤\" or r.name == \"엔씨소프트\")\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n            |> map(fn: (r) => ({ r with _field: r.name }))\n            |> drop(columns: [\"name\", \"ticker\"])\n            ",
+            "refId": "A"
+          }
+        ],
+        "title": "엔터테인먼트·게임",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "barWidthFactor": 0.6,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "showValues": false,
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 24
+        },
+        "id": 9,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "hideZeros": false,
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "12.3.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) => r.name == \"삼성전자\" or r.name == \"SK하이닉스\" or r.name == \"현대차\" or r.name == \"KB금융\")\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n            |> map(fn: (r) => ({ r with _field: r.name }))\n            |> drop(columns: [\"name\", \"ticker\"])\n            ",
+            "refId": "A"
+          }
+        ],
+        "title": "대형주 (반도체·자동차·금융)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 32
+        },
+        "id": 10,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"KODEX200\" or\n      r.name == \"KODEX 코스닥150\" or\n      r.name == \"TIGER 미국S&P500\" or\n      r.name == \"TIGER 미국나스닥100\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n        ",
+            "refId": "A"
+          }
+        ],
+        "title": "정상장 - 성장 주도 (지수 ETF)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 32
+        },
+        "id": 11,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"KODEX 배당가치\" or\n      r.name == \"TIGER 코리아배당다우존스\" or\n      r.name == \"KODEX 국고채3년\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n        ",
+            "refId": "A"
+          }
+        ],
+        "title": "정상장 - 인컴 방어 (배당/채권)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 32
+        },
+        "id": 12,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"KODEX 골드선물(H)\" or\n      r.name == \"KODEX 국고채3년\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n        ",
+            "refId": "A"
+          }
+        ],
+        "title": "정상장 - 헤지 자산 (금/채권)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "auto",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 40
+        },
+        "hideTimeOverride": true,
+        "id": 13,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "maxDataPoints": 1000,
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"KODEX200\" or\n      r.name == \"KODEX 코스닥150\" or\n      r.name == \"SPY\" or\n      r.name == \"QQQ\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": "2020-02-01T00:00:00Z",
+        "timeRange": {
+          "from": "2020-02-01T00:00:00.000Z",
+          "to": "2020-04-30T23:59:59.000Z"
+        },
+        "timeTo": "2020-04-30T23:59:59Z",
+        "title": "급락장 (2020 코로나) - 지수 ETF",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "auto",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 40
+        },
+        "hideTimeOverride": true,
+        "id": 14,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "maxDataPoints": 1000,
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"KODEX 배당가치\" or\n      r.name == \"TIGER 코리아배당다우존스\" or\n      r.name == \"Global X S&P 500 Covered Call\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": "2020-02-01T00:00:00Z",
+        "timeRange": {
+          "from": "2020-02-01T00:00:00.000Z",
+          "to": "2020-04-30T23:59:59.000Z"
+        },
+        "timeTo": "2020-04-30T23:59:59Z",
+        "title": "급락장 (2020 코로나) - 배당/커버드콜",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 10,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "auto",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 40
+        },
+        "hideTimeOverride": true,
+        "id": 15,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "maxDataPoints": 1000,
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"KODEX 국고채3년\" or\n      r.name == \"KODEX 골드선물(H)\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n        ",
+            "refId": "A"
+          }
+        ],
+        "timeFrom": "2020-02-01T00:00:00Z",
+        "timeRange": {
+          "from": "2020-02-01T00:00:00.000Z",
+          "to": "2020-04-30T23:59:59.000Z"
+        },
+        "timeTo": "2020-04-30T23:59:59Z",
+        "title": "급락장 (2020 코로나) - 방어 자산 (채권/금)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 3,
+              "pointSize": 5,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 48
+        },
+        "id": 16,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) => r.name == \"KODEX 국고채3년\")\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n        ",
+            "refId": "A"
+          }
+        ],
+        "title": "금리 사이클 - KODEX 국고채3년 (채권가격 = 금리 역방향)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 56
+        },
+        "id": 17,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"KODEX200\" or\n      r.name == \"KODEX 코스닥150\" or\n      r.name == \"KODEX 배당가치\" or\n      r.name == \"TIGER 코리아배당다우존스\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n        ",
+            "refId": "A"
+          }
+        ],
+        "title": "금리 사이클 - 한국 지수/배당 (성장 vs 가치)",
+        "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "lineInterpolation": "smooth",
+              "lineWidth": 2,
+              "pointSize": 5,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": 0
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 56
+        },
+        "id": 18,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\")\n  |> filter(fn: (r) =>\n      r.name == \"SPY\" or\n      r.name == \"QQQ\" or\n      r.name == \"Global X S&P 500 Covered Call\"\n  )\n  |> filter(fn: (r) => r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n  |> map(fn: (r) => ({ r with _field: r.name }))\n  |> drop(columns: [\"name\", \"ticker\"])\n",
+            "refId": "A"
+          }
+        ],
+        "title": "금리 사이클 - 미국 지수/커버드콜 (성장 vs 인컴)",
+        "type": "timeseries"
+      },
+      {
+        "id": 22,
+        "title": "한국 주가지수/ETF (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 72
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"코스피\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"코스피\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"코스닥\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"코스닥\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX200\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"KODEX200\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 23,
+        "title": "미국 주가지수/ETF (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 72
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"S&P500\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"S&P500\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"나스닥\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"나스닥\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"QQQ\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"QQQ\"}))\n\n\ns3 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"SPY\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns3_first = s3 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns3_norm = s3\n  |> map(fn: (r) => ({r with _value: r._value / s3_first._value * 100.0, _field: \"SPY\"}))\n\n\ns4 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"DIA\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns4_first = s4 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns4_norm = s4\n  |> map(fn: (r) => ({r with _value: r._value / s4_first._value * 100.0, _field: \"DIA\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm, s3_norm, s4_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 24,
+        "title": "IT 플랫폼 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 80
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"NAVER\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"NAVER\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"카카오\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"카카오\"}))\n\nunion(tables: [s0_norm, s1_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 25,
+        "title": "엔터테인먼트·게임 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 80
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"HYBE\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"HYBE\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"SM\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"SM\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"JYP Ent.\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"JYP Ent.\"}))\n\n\ns3 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"크래프톤\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns3_first = s3 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns3_norm = s3\n  |> map(fn: (r) => ({r with _value: r._value / s3_first._value * 100.0, _field: \"크래프톤\"}))\n\n\ns4 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"엔씨소프트\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns4_first = s4 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns4_norm = s4\n  |> map(fn: (r) => ({r with _value: r._value / s4_first._value * 100.0, _field: \"엔씨소프트\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm, s3_norm, s4_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 26,
+        "title": "대형주 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 80
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"삼성전자\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"삼성전자\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"SK하이닉스\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"SK하이닉스\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"현대차\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"현대차\"}))\n\n\ns3 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KB금융\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns3_first = s3 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns3_norm = s3\n  |> map(fn: (r) => ({r with _value: r._value / s3_first._value * 100.0, _field: \"KB금융\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm, s3_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 27,
+        "title": "정상장 - 지수 ETF (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 88
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX200\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"KODEX200\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 코스닥150\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"KODEX 코스닥150\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"SPY\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"SPY\"}))\n\n\ns3 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"QQQ\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns3_first = s3 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns3_norm = s3\n  |> map(fn: (r) => ({r with _value: r._value / s3_first._value * 100.0, _field: \"QQQ\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm, s3_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 28,
+        "title": "정상장 - 배당/채권 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 88
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 배당가치\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"KODEX 배당가치\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"TIGER 코리아배당다우존스\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"TIGER 코리아배당다우존스\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 국고채3년\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"KODEX 국고채3년\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 29,
+        "title": "정상장 - 헤지 자산 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 88
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 골드선물(H)\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"KODEX 골드선물(H)\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 국고채3년\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"KODEX 국고채3년\"}))\n\nunion(tables: [s0_norm, s1_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 30,
+        "title": "급락장 - 지수 ETF (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 0,
+          "y": 96
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX200\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"KODEX200\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 코스닥150\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"KODEX 코스닥150\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"SPY\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"SPY\"}))\n\n\ns3 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"QQQ\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns3_first = s3 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns3_norm = s3\n  |> map(fn: (r) => ({r with _value: r._value / s3_first._value * 100.0, _field: \"QQQ\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm, s3_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 31,
+        "title": "급락장 - 배당/커버드콜 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 8,
+          "y": 96
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 배당가치\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"KODEX 배당가치\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"TIGER 코리아배당다우존스\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"TIGER 코리아배당다우존스\"}))\n\nunion(tables: [s0_norm, s1_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 32,
+        "title": "급락장 - 방어 자산 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 8,
+          "x": 16,
+          "y": 96
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 골드선물(H)\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"KODEX 골드선물(H)\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: 2020-02-01T00:00:00Z, stop: 2020-04-30T23:59:59Z)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 국고채3년\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"KODEX 국고채3년\"}))\n\nunion(tables: [s0_norm, s1_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 33,
+        "title": "금리 사이클 - 한국 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 104
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX200\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"KODEX200\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 코스닥150\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"KODEX 코스닥150\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"KODEX 배당가치\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"KODEX 배당가치\"}))\n\n\ns3 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"TIGER 코리아배당다우존스\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns3_first = s3 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns3_norm = s3\n  |> map(fn: (r) => ({r with _value: r._value / s3_first._value * 100.0, _field: \"TIGER 코리아배당다우존스\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm, s3_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      },
+      {
+        "id": 34,
+        "title": "금리 사이클 - 미국 (정규화)",
+        "type": "timeseries",
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 104
+        },
+        "datasource": {
+          "type": "influxdb",
+          "uid": "influxdb"
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "influxdb",
+              "uid": "influxdb"
+            },
+            "query": "\ns0 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"SPY\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns0_first = s0 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns0_norm = s0\n  |> map(fn: (r) => ({r with _value: r._value / s0_first._value * 100.0, _field: \"SPY\"}))\n\n\ns1 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"QQQ\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns1_first = s1 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns1_norm = s1\n  |> map(fn: (r) => ({r with _value: r._value / s1_first._value * 100.0, _field: \"QQQ\"}))\n\n\ns2 = from(bucket: \"econ_market\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"stock_prices\" and r.name == \"Global X S&P 500 Covered Call\" and r._field == \"close\")\n  |> aggregateWindow(every: 1d, fn: last, createEmpty: false)\n\ns2_first = s2 |> first() |> findRecord(fn: (key) => true, idx: 0)\n\ns2_norm = s2\n  |> map(fn: (r) => ({r with _value: r._value / s2_first._value * 100.0, _field: \"Global X S&P 500 Covered Call\"}))\n\nunion(tables: [s0_norm, s1_norm, s2_norm])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth",
+              "fillOpacity": 0,
+              "lineWidth": 2,
+              "showPoints": "never",
+              "spanNulls": false
+            },
+            "unit": "none",
+            "color": {
+              "mode": "palette-classic"
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "multi",
+            "sort": "desc"
+          }
+        }
+      }
+    ],
+    "preload": false,
+    "refresh": "5m",
+    "schemaVersion": 42,
+    "tags": [
+      "econ",
+      "market",
+      "15years",
+      "gdp"
+    ],
+    "templating": {
+      "list": []
+    },
+    "time": {
+      "from": "now-15y",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": [
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "1d"
+      ]
+    },
+    "timezone": "Asia/Seoul",
+    "title": "경제·주가 통합 모니터링 (15년, GDP 포함)_v3_정규화추가",
+    "uid": "61949380-5d71-405c-a0a3-3150bdc1fb6d",
+    "version": 10,
+    "weekStart": ""
+  },
+  "folderId": 0,
+  "overwrite": true
+}
