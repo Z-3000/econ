@@ -39,7 +39,7 @@ BOK_API_KEY = config.BOK_API_KEY
 
 ### 2.3 저장 경로 (라즈베리파이)
 ```python
-BASE_DIR = "/raspi/WD4T"
+BASE_DIR = "/WD4T/econ"
 NEWS_DIR = f"{BASE_DIR}/data/news"      # news.csv
 STOCK_DIR = f"{BASE_DIR}/data/stock"    # stock.csv
 ECONOMY_DIR = f"{BASE_DIR}/data/economy" # economy.csv
@@ -145,25 +145,33 @@ ECONOMY_DIR = f"{BASE_DIR}/data/economy" # economy.csv
 | `기술` | 기술/IT 섹터 | 기술주 상관분석 |
 | `IP` | IP(지적재산권) 기반 | IP사업 트렌드 분석 |
 
-#### 경제지표 (한국은행 ECOS API)
-| 지표 | 통계코드 | 항목코드 | 주기 |
-|------|----------|----------|------|
-| 원/달러 환율 | 731Y001 | 0000001 | D (일별) |
-| 원/엔 환율 | 731Y001 | 0000002 | D |
-| 원/유로 환율 | 731Y001 | 0000003 | D |
-| 기준금리 | 722Y001 | 0101000 | M (월별) |
-| 두바이유 가격 | 902Y007 | DUBAIOIL | D |
-| 금 시세 | 902Y007 | GOLD | D |
-| 콜금리 | 722Y001 | 0101000 | D |
+#### 경제지표 (한국은행 ECOS API + yfinance)
 
-> **참고**: 두바이유/금 시세는 ECOS API에서 no_data 반환됨
+**ECOS API 지표 (5종)**
+| 지표 | 통계코드 | 항목코드 | 주기 | 조회 기간 |
+|------|----------|----------|------|----------|
+| 원/달러 환율 | 731Y001 | 0000001 | D (일별) | 최근 7일 |
+| 원/엔 환율 | 731Y001 | 0000002 | D | 최근 7일 |
+| 원/유로 환율 | 731Y001 | 0000003 | D | 최근 7일 |
+| 기준금리 | 722Y001 | 0101000 | M (월별) | 최근 3개월 |
+| 콜금리 | 722Y001 | 0101000 | D | 최근 7일 |
+
+> **개선사항 (2025-12-09)**: 단일 날짜 조회에서 기간 조회로 변경하여 휴장/주말 데이터 수집 실패 해결
+
+**yfinance 원자재 지표 (2종)**
+| 지표 | 티커 | 설명 |
+|------|------|------|
+| WTI 유가 | CL=F | 서부텍사스중질유 선물 |
+| 금 선물 | GC=F | COMEX 금 선물 |
+
+> **변경 이력**: 두바이유/금 시세는 ECOS API(902Y007)에서 조회 불가하여 yfinance로 대체 (2025-12-09)
 
 ### 2.5 Cron 스케줄
 ```bash
 # 라즈베리파이 crontab
-0 8 * * * /home/raspi/influx_venv/bin/python /raspi/WD4T/01_scripts/01_data_collector.py   # 08:00 (매일)
-0 16 * * 1-5 /home/raspi/influx_venv/bin/python /raspi/WD4T/01_scripts/01_data_collector.py # 16:00 (평일)
-0 20 * * * /home/raspi/influx_venv/bin/python /raspi/WD4T/01_scripts/01_data_collector.py   # 20:00 (매일)
+0 8 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py   # 08:00 (매일)
+0 16 * * 1-5 /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py # 16:00 (평일)
+0 20 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py   # 20:00 (매일)
 ```
 
 ### 2.6 출력 스키마
@@ -223,7 +231,7 @@ ECONOMY_DIR = f"{BASE_DIR}/data/economy" # economy.csv
 
 ### 3.4 저장 경로 (라즈베리파이)
 ```python
-BASE_DIR = "/raspi/WD4T/00_data_raw/archive"
+BASE_DIR = "/WD4T/econ/00_data_raw/archive"
 # korean_stocks_*.csv (3개 파일)
 # us_stocks_*.csv (3개 파일)
 # fred_indicators_*.csv (3개 파일)
@@ -234,7 +242,7 @@ BASE_DIR = "/raspi/WD4T/00_data_raw/archive"
 ```bash
 # 라즈베리파이
 source ~/influx_venv/bin/activate
-python /raspi/WD4T/01_scripts/02_collect_15year_historical.py
+python /WD4T/econ/01_scripts/02_collect_15year_historical.py
 ```
 
 ### 3.6 수집 결과 (2025-12-03 기준)
@@ -280,13 +288,13 @@ python /raspi/WD4T/01_scripts/02_collect_15year_historical.py
 
 ### 4.4 저장 경로
 ```python
-OUTPUT_FILE = "/raspi/WD4T/00_data_raw/archive/gdp_2010_2025.csv"
+OUTPUT_FILE = "/WD4T/econ/00_data_raw/archive/gdp_2010_2025.csv"
 ```
 
 ### 4.5 실행 방법
 ```bash
 source ~/influx_venv/bin/activate
-python /raspi/WD4T/01_scripts/collect_gdp_only.py
+python /WD4T/econ/01_scripts/collect_gdp_only.py
 ```
 
 ### 4.6 수집 결과
@@ -337,7 +345,7 @@ economy_df.drop_duplicates(subset=['date', 'indicator'], keep='last')
 ### 5.4 실행 방법
 ```bash
 source ~/influx_venv/bin/activate
-python /raspi/WD4T/01_scripts/03_merge_historical_data.py
+python /WD4T/econ/01_scripts/03_merge_historical_data.py
 ```
 
 ### 5.5 병합 결과 (2025-12-03)
@@ -376,7 +384,7 @@ INFLUXDB_BUCKET = config.INFLUXDB_BUCKET
 ### 6.4 실행 방법
 ```bash
 source ~/influx_venv/bin/activate
-python /raspi/WD4T/01_scripts/04_influxdb_backfill_15years.py
+python /WD4T/econ/01_scripts/04_influxdb_backfill_15years.py
 ```
 
 ### 6.5 백필 결과 (2025-12-03)
@@ -422,12 +430,12 @@ python /raspi/WD4T/01_scripts/04_influxdb_backfill_15years.py
 ### 7.4 실행 방법
 ```bash
 source ~/influx_venv/bin/activate
-python /raspi/WD4T/01_scripts/05_create_grafana_dashboard_v2.py
+python /WD4T/econ/01_scripts/05_create_grafana_dashboard_v2.py
 ```
 
 ### 7.5 출력 파일
 ```
-/raspi/WD4T/03_outputs/grafana_dashboard_final.json
+/WD4T/econ/03_outputs/grafana_dashboard_final.json
 ```
 
 ---
@@ -451,7 +459,7 @@ GRAFANA_PASSWORD = config.GRAFANA_PASSWORD
 ### 8.3 실행 방법
 ```bash
 source ~/influx_venv/bin/activate
-python /raspi/WD4T/01_scripts/06_upload_grafana_dashboard.py
+python /WD4T/econ/01_scripts/06_upload_grafana_dashboard.py
 ```
 
 ### 8.4 업로드 결과
@@ -704,4 +712,4 @@ USE_HISTORICAL = False  # 최근 수집 데이터
 
 ---
 
-*최종 업데이트: 2025-12-03*
+*최종 업데이트: 2025-12-09*

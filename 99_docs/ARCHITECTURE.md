@@ -540,7 +540,7 @@ flowchart TB
 |-------------|--------|------|
 | `cpu` | usage_idle, usage_user, usage_system | CPU 사용률 |
 | `mem` | used, available, used_percent | 메모리 |
-| `disk` | free, used, used_percent | 디스크 (/, /raspi/WD4T) |
+| `disk` | free, used, used_percent | 디스크 (/, /WD4T/econ) |
 | `cpu_temp` | value | CPU 온도 (밀리섭씨) |
 | `net` | bytes_recv, bytes_sent | 네트워크 (eth0, tailscale0) |
 | `diskio` | read_bytes, write_bytes | 디스크 I/O (mmcblk0) |

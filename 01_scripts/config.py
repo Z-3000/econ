@@ -40,7 +40,7 @@ class Config:
     # ========================================
     # 경로 설정
     # ========================================
-    BASE_DIR = "/raspi/WD4T"
+    BASE_DIR = "/WD4T/econ"
     DATA_DIR = f"{BASE_DIR}/00_data_raw"
     PROCESSED_DIR = f"{BASE_DIR}/00-1_data_processed"
     ARCHIVE_DIR = f"{BASE_DIR}/00_data_raw/archive"
@@ -149,7 +149,7 @@ class Config:
         "TIGER 코리아배당다우존스": "269370.KS",
         "KODEX 국고채3년": "114260.KS",
         "KODEX 골드선물(H)": "132030.KS",
-        "KODEX 미국S&P500커버드콜OTM": "453530.KS",
+        # 참고: KODEX 미국S&P500커버드콜OTM(453530.KS)은 yfinance에서 조회 불가하여 제외
 
         # 개별종목 (16개)
         "삼성전자": "005930.KS",

@@ -271,7 +271,7 @@
               "type": "influxdb",
               "uid": "influxdb"
             },
-            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"disk\")\n  |> filter(fn: (r) => r._field == \"free\")\n  |> filter(fn: (r) => r.path == \"/raspi/WD4T\")\n  |> last()\n            ",
+            "query": "\nfrom(bucket: \"econ_market\")\n  |> range(start: -5m)\n  |> filter(fn: (r) => r._measurement == \"disk\")\n  |> filter(fn: (r) => r._field == \"free\")\n  |> filter(fn: (r) => r.path == \"/WD4T\")\n  |> last()\n            ",
             "refId": "A"
           }
         ],

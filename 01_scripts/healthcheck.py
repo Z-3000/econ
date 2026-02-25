@@ -10,7 +10,7 @@
 
 실행 방법:
     source ~/influx_venv/bin/activate
-    python /raspi/WD4T/01_scripts/healthcheck.py
+    python /WD4T/econ/01_scripts/healthcheck.py
 """
 
 import os

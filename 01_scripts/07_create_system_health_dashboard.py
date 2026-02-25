@@ -15,7 +15,7 @@ import requests
 import os
 from dotenv import load_dotenv
 
-load_dotenv('/raspi/WD4T/.env')
+load_dotenv('/WD4T/econ/.env')
 
 GRAFANA_URL = os.getenv('GRAFANA_URL', 'http://localhost:3000')
 GRAFANA_USER = os.getenv('GRAFANA_USER', 'admin')
@@ -253,7 +253,7 @@ from(bucket: "econ_market")
   |> range(start: -5m)
   |> filter(fn: (r) => r._measurement == "disk")
   |> filter(fn: (r) => r._field == "free")
-  |> filter(fn: (r) => r.path == "/raspi/WD4T")
+  |> filter(fn: (r) => r.path == "/WD4T")
   |> last()
             ''',
             "refId": "A"
@@ -525,7 +525,7 @@ def main():
     dashboard = create_dashboard()
 
     # JSON 파일 저장
-    output_path = "/raspi/WD4T/03_outputs/system_health_dashboard.json"
+    output_path = "/WD4T/econ/03_outputs/system_health_dashboard.json"
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(dashboard, f, ensure_ascii=False, indent=2)
     print(f"\nJSON 저장: {output_path}")

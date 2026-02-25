@@ -13,7 +13,7 @@ from datetime import datetime
 # ===========================
 # 설정
 # ===========================
-BASE_DIR = "/raspi/WD4T"
+BASE_DIR = "/WD4T/econ"
 ARCHIVE_DIR = f"{BASE_DIR}/00_data_raw/archive"
 OUTPUT_DIR = f"{BASE_DIR}/00_data_raw"
 

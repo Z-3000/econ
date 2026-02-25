@@ -86,10 +86,12 @@ class TelegramNotifier:
             results: 수집 결과 딕셔너리
                 {
                     'news': {'success': 20, 'fail': 0, 'time_ms': 1500},
-                    'stock': {'success': 68, 'fail': 0, 'time_ms': 45000},
-                    'economy': {'success': 5, 'fail': 2, 'time_ms': 3000},
+                    'stock': {'success': 68, 'fail': 0, 'no_data': 5, 'time_ms': 45000},
+                    'economy': {'success': 5, 'fail': 2, 'no_data': 2, 'time_ms': 3000},
                     'total_time_ms': 50000,
-                    'has_error': False
+                    'has_error': False,
+                    'market_info': '주말 휴장',
+                    'failed_items': ['KODEX 미국S&P500커버드콜OTM(453530.KS)']
                 }
 
         Returns:
@@ -97,7 +99,7 @@ class TelegramNotifier:
         """
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # 전체 성공 여부 판단
+        # 전체 성공 여부 판단 (실제 에러만 카운트, 휴장은 제외)
         has_error = results.get('has_error', False)
 
         # 총 실행 시간 (초)
@@ -113,9 +115,14 @@ class TelegramNotifier:
 <code>─────────────────────</code>
 📅 {now}
 ⏱️ 총 {total_sec:.1f}초
-
-<b>📊 수집 결과</b>
 """
+
+        # 휴장/시장 정보 표시
+        market_info = results.get('market_info', '')
+        if market_info:
+            message += f"📌 {market_info}\n"
+
+        message += "\n<b>📊 수집 결과</b>\n"
 
         # 각 작업별 결과 추가
         task_icons = {
@@ -129,19 +136,41 @@ class TelegramNotifier:
                 r = results[task]
                 success = r.get('success', 0)
                 fail = r.get('fail', 0)
+                no_data = r.get('no_data', 0)  # 휴장/데이터 없음
                 time_sec = r.get('time_ms', 0) / 1000
 
-                # 실패가 있으면 경고 표시
+                # 결과 라인 구성
+                parts = [f"{success}✓"]
+                if no_data > 0:
+                    parts.append(f"{no_data}📅")  # 휴장 표시
                 if fail > 0:
-                    line = f"{icon} {task}: {success}✓ / {fail}✗ ({time_sec:.1f}s) ⚠️"
-                else:
-                    line = f"{icon} {task}: {success}건 ({time_sec:.1f}s)"
+                    parts.append(f"{fail}✗")
+
+                line = f"{icon} {task}: {' / '.join(parts)} ({time_sec:.1f}s)"
+                if fail > 0:
+                    line += " ⚠️"
 
                 message += line + "\n"
 
+        # 과거 데이터 사용 항목 (있을 경우) - 성공이지만 최신 데이터가 아닌 경우
+        delayed_items = results.get('delayed_items', [])
+        if delayed_items:
+            message += "\n<b>📅 과거 데이터 사용</b>\n"
+            for item in delayed_items[:7]:  # 최대 7개
+                message += f"• {item}\n"
+
+        # 실패 종목 상세 정보 (있을 경우)
+        failed_items = results.get('failed_items', [])
+        if failed_items:
+            message += "\n<b>⚠️ 실패 항목</b>\n"
+            for item in failed_items[:5]:  # 최대 5개
+                message += f"• {item[:40]}\n"
+            if len(failed_items) > 5:
+                message += f"• ... 외 {len(failed_items) - 5}개\n"
+
         # 에러 상세 정보 (있을 경우)
         if has_error and 'errors' in results:
-            message += "\n<b>⚠️ 에러 상세</b>\n"
+            message += "\n<b>❌ 에러 상세</b>\n"
             for err in results.get('errors', [])[:3]:  # 최대 3개
                 message += f"• {err[:50]}\n"
 

@@ -483,7 +483,7 @@ def main():
     dashboard = create_dashboard()
 
     # JSON 파일로 저장
-    output_file = "/raspi/WD4T/03_outputs/grafana_dashboard_final.json"
+    output_file = "/WD4T/econ/03_outputs/grafana_dashboard_final.json"
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(dashboard, f, indent=2, ensure_ascii=False)
 

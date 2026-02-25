@@ -297,7 +297,7 @@ from(bucket: "econ_market")
 ## 10. 유지보수 고려사항
 
 ### 10.1 대시보드 버전 관리
-- **파일**: `/raspi/WD4T/03_outputs/grafana_dashboard_final.json`
+- **파일**: `/WD4T/econ/03_outputs/grafana_dashboard_final.json`
 - **Git 저장**: 변경 시 커밋
 - **백업**: 수동 export (월 1회)
 
@@ -309,10 +309,10 @@ from(bucket: "econ_market")
 ### 10.3 대시보드 업데이트 프로세스
 ```bash
 # 1. 대시보드 JSON 수정
-python /raspi/WD4T/01_scripts/create_grafana_dashboard_v2.py
+python /WD4T/econ/01_scripts/create_grafana_dashboard_v2.py
 
 # 2. Grafana에 업로드
-python /raspi/WD4T/01_scripts/upload_grafana_dashboard.py
+python /WD4T/econ/01_scripts/upload_grafana_dashboard.py
 
 # 3. 동작 확인
 curl http://112.167.173.132:3000/d/55cf3a41-b6d2-48ad-8f98-1ec417944655

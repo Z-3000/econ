@@ -2,7 +2,7 @@
 
 라즈베리파이 기반 **경제지표/주가 자동 수집 시스템**
 
-76개 종목 (한국 27 + 미국 41) + 경제지표 **15년치 118,312건** 데이터를 자동 수집하고, **InfluxDB + Grafana**로 실시간 모니터링합니다.
+76개 종목 (한국 27 + 미국 41) + 경제지표 7종(환율, 금리, 원자재) **15년치 118,312건** 데이터를 자동 수집하고, **InfluxDB + Grafana**로 실시간 모니터링합니다.
 
 ---
 
@@ -61,7 +61,7 @@
 ## 프로젝트 구조
 
 ```
-/raspi/WD4T/
+/WD4T/econ/
 ├── .env                   # API 키/토큰/비밀번호 (Git 제외)
 ├── .env.example           # 환경변수 템플릿
 ├── 00_data_raw/           # 원본 데이터
@@ -101,11 +101,12 @@
 | 미국 지수 | 3 | S&P500, 나스닥, VIX |
 | 미국 ETF | 38 | QQQ, SPY, SCHD, TLT, GLD 등 |
 
-### 경제지표
+### 경제지표 (7종)
 
 | 출처 | 지표 |
 |------|------|
-| ECOS (한국은행) | 환율, 기준금리, CPI, GDP |
+| ECOS (한국은행) | 환율(원/달러, 원/엔, 원/유로), 기준금리, 콜금리 |
+| yfinance | WTI 유가(CL=F), 금 선물(GC=F) |
 | FRED (미국) | GDP, CPI, 실업률, 10년 국채금리 |
 
 ### 데이터 규모
@@ -171,9 +172,9 @@ crontab -e
 ```
 
 ```cron
-0 8 * * * /home/raspi/influx_venv/bin/python /raspi/WD4T/01_scripts/01_data_collector.py >> /raspi/WD4T/98_logs/cron.log 2>&1
-0 16 * * 1-5 /home/raspi/influx_venv/bin/python /raspi/WD4T/01_scripts/01_data_collector.py >> /raspi/WD4T/98_logs/cron.log 2>&1
-0 20 * * * /home/raspi/influx_venv/bin/python /raspi/WD4T/01_scripts/01_data_collector.py >> /raspi/WD4T/98_logs/cron.log 2>&1
+0 8 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
+0 16 * * 1-5 /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
+0 20 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
 ```
 
 ---
@@ -243,4 +244,4 @@ MIT License
 [Z-3000]
 
 - 작성일: 2025-11
-- 최종 수정: 2025-12-03
+- 최종 수정: 2025-12-09
