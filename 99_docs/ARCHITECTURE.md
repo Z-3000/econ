@@ -13,7 +13,7 @@ flowchart TB
     subgraph 데이터수집["데이터 수집 (라즈베리파이)"]
         CRON[Cron 스케줄러]
         DC[data_collector.py]
-        CRON -->|08:00, 16:00, 20:00| DC
+        CRON -->|06:10, 15:40| DC
     end
 
     subgraph 외부API["외부 API"]
@@ -86,14 +86,13 @@ flowchart TB
 ```mermaid
 flowchart LR
     subgraph 스케줄["수집 스케줄 (KST)"]
-        T1["08:00<br/>미국장 마감 후"]
-        T2["16:00<br/>한국장 마감 후"]
-        T3["20:00<br/>저녁 업데이트"]
+        T1["06:10<br/>미국장 마감 후 10분"]
+        T2["15:40<br/>한국장 마감 후 10분"]
     end
 
     subgraph 수집항목["수집 항목"]
-        KR["한국 주가<br/>(5종목)"]
-        US["미국 주가<br/>(8종목)"]
+        KR["한국 주가<br/>(일봉 확정)"]
+        US["미국 주가<br/>(일봉 확정)"]
         EC["경제지표<br/>(환율/금리)"]
         NW["뉴스<br/>(4키워드)"]
     end
@@ -105,9 +104,6 @@ flowchart LR
     T2 --> KR
     T2 --> EC
     T2 --> NW
-
-    T3 --> EC
-    T3 --> NW
 ```
 
 ---
@@ -573,3 +569,17 @@ flowchart TB
 | 메모리 사용률 | < 60% | 60-80% | > 90% |
 | 디스크 사용률 | < 60% | 60-80% | > 90% |
 | CPU 온도 | < 50°C | 50-65°C | > 80°C |
+
+---
+
+
+---
+
+<!-- DOC_UPDATE_2026-02-25 -->
+## 아키텍처 변경 메모 (2026-02-25)
+- 백필 검증 정확도를 위해 InfluxDB 버킷을 논리적으로 분리했습니다.
+  - 운영: `econ_market`
+  - 백필 검증: `econ_market_backfill_2010_2025`
+- 신규 컴포넌트: `01_scripts/09_validate_influx_integrity.py`
+  - CSV 원본과 InfluxDB 키셋을 비교해 누락/추가/결측 기준 리포트 생성
+- 수집기(`01_data_collector.py`) 경제지표 적재 시 `period` 태그가 날짜 포맷에 따라 `daily/monthly`로 기록되도록 수정했습니다.

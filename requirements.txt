@@ -30,3 +30,4 @@ python-dotenv>=1.0.0
 # 감성분석 (Phase 3, 선택)
 # konlpy>=0.6.0
 # transformers>=4.35.0
+pytz

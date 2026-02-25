@@ -434,3 +434,18 @@ from(bucket: "econ_market")
 - InfluxDB Flux 공식 문서: https://docs.influxdata.com/flux/
 - Grafana InfluxDB 연동: https://grafana.com/docs/grafana/latest/datasources/influxdb/
 - Flux 함수 목록: https://docs.influxdata.com/flux/v0/stdlib/
+
+---
+
+
+---
+
+<!-- DOC_UPDATE_2026-02-25 -->
+## Flux 전처리 가이드 보완 (2026-02-25)
+- 버킷 하드코딩 대신 변수화(`v.bucket`) 권장
+- 백필 검증 쿼리는 `econ_market_backfill_2010_2025` 대상으로 실행
+- 경제지표는 `period` 태그를 조건에 포함해 일/월 데이터를 분리 조회
+
+## 추가 쿼리 아이디어
+1. `difference()` 기반 누락 탐지 시계열
+2. `group(columns:["indicator","period"])` 기준 건수 검증

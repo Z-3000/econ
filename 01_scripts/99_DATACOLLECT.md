@@ -713,3 +713,21 @@ USE_HISTORICAL = False  # 최근 수집 데이터
 ---
 
 *최종 업데이트: 2025-12-09*
+
+---
+
+
+---
+
+<!-- DOC_UPDATE_2026-02-25 -->
+## 스크립트 운영 업데이트 (2026-02-25)
+- `04_influxdb_backfill_15years.py`
+  - 입력 CSV를 `stock_kr_2010_2025_with_adj.csv`, `stock_us_2010_2025_with_adj.csv`로 전환
+- `01_data_collector.py`
+  - 경제지표 적재 시 `period` 태그를 `daily/monthly`로 정확히 기록
+- 신규: `09_validate_influx_integrity.py`
+  - 운영/백필 버킷 정합성 리포트 생성
+
+## 운영 메모
+1. 백필 검증은 `econ_market_backfill_2010_2025` 기준
+2. 운영 모니터링은 `econ_market` 기준

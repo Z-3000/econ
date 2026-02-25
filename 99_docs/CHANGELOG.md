@@ -39,6 +39,48 @@ indicators = [(f"722Y001/D/{seven_days_ago}/{today_str}/0101000", "콜금리", "
 | `01_scripts/01_data_collector.py` | ECOS 조회 기간 확장, yfinance 원자재 추가, delayed_items 추적 |
 | `01_scripts/notifier.py` | 과거 데이터 사용 항목 표시 섹션 추가 |
 
+---
+
+## [2026-02-25] 일봉 대표성 강화 & 스케줄 개편
+
+### 배경
+- 기존 하루 3회 수집은 yfinance에 게시된 "마지막 일봉"을 가져와 당일 시가/종가를 보장하지 못했음.
+- 중복 append로 같은 거래일이 여러 줄 기록되고, 게시 지연 여부를 구분할 수 없었음.
+
+### 변경 내용
+1) **장마감 단일 수집 시각**
+   - 미국: 06:10 KST (16:00 ET + 10분 버퍼)
+   - 한국: 15:40 KST (15:30 KST + 10분 버퍼)
+
+2) **타겟 거래일 검증 로직**
+   - `get_target_trade_date()`가 시장별 타임존을 사용해 목표 거래일을 산출 후, yfinance를 `start=target, end=target+1, interval="1d"`로 조회.
+   - 목표 날짜가 없으면 최신 바를 `stale`로 기록하고 알림에 표시.
+
+3) **중복 제거 & 확장 필드**
+   - `bar_date + ticker` 키로 덮어쓰기 저장 (append 중복 제거).
+   - 필드 추가: `bar_date`, `adj_close`, `status` (success/stale/error).
+
+4) **InfluxDB 측정값 확장**
+   - `stock_prices`에 `adj_close`와 `status_code`(1=success, 0=stale) 추가.
+
+5) **알림/메타 정보**
+   - Telegram: `stale` 항목을 "과거 데이터 사용" 섹션에 날짜와 함께 표시.
+   - `market_info`: 게시 지연 발생 시 표시.
+
+### 수정된 파일
+| 파일 | 변경 내용 |
+|------|-----------|
+| `01_scripts/01_data_collector.py` | 일봉 타겟 날짜 검증, 단일 실행 전제, 중복 제거, adj_close/status 필드 추가 |
+| `01_scripts/config.py` | (참조) 경로/티커 동일, Cron 시각은 crontab에서 조정 필요 |
+| `99_docs/ARCHITECTURE.md` | 스케줄 다이어그램을 2회(06:10, 15:40)로 개정 |
+| `99_docs/DATA_SOURCE_POLICY.md` | 수집 주기 원칙/시간대 개정, 중복 제거·지연 탐지 명시 |
+| `README.md` | 주요 기능 및 Cron 안내를 2회 수집 기준으로 업데이트 |
+| `99_docs/GRAFANA_QUERY_GUIDE.md` | Grafana에서 status_code 필터/adj_close 활용 가이드 (신규) |
+
+### 운영 안내
+- crontab을 08/16/20 → 06:10/15:40으로 교체 필요.
+- yfinance 게시 지연이 잦을 경우 재시도 횟수/대기(`fetch_stock_bar_with_retry`)를 조정.
+
 ### 수집 결과 비교
 | 항목 | 변경 전 | 변경 후 |
 |------|---------|---------|
@@ -841,3 +883,24 @@ USE_HISTORICAL = False  # 최근 수집 데이터 사용
 - HYBE: 2020-10-15 ~ (1,256일)
 - 크래프톤: 2021-08-10 ~ (1,051일)
 - 기타 종목: 2020-01-02 ~ (1,450일 이상)
+
+---
+
+
+---
+
+<!-- DOC_UPDATE_2026-02-25 -->
+## 2026-02-25
+### Added
+- `01_scripts/09_validate_influx_integrity.py` (CSV vs InfluxDB 정합성 검증 도구)
+- InfluxDB bucket `econ_market_backfill_2010_2025` (백필 검증 전용)
+
+### Changed
+- `01_scripts/04_influxdb_backfill_15years.py`: 백필 입력 파일을 `*_with_adj.csv`로 전환
+- `01_scripts/01_data_collector.py`: 경제지표 `period` 태그를 날짜 포맷 기반(`daily/monthly`)으로 수정
+
+### Data Operations
+- 15년 백필 재실행 완료 (KR/US/FRED/ECOS)
+- DQ 리포트 생성:
+  - `98_logs/dq_econ_market.json`
+  - `98_logs/dq_econ_market_backfill_2010_2025.json`

@@ -10,10 +10,11 @@
 
 | 기능 | 설명 |
 |------|------|
-| **자동 수집** | Cron으로 하루 3회 (08:00/16:00/20:00) 자동 실행 |
+| **자동 수집** | Cron으로 하루 2회 (06:10/15:40, 장마감+버퍼) 자동 실행 |
 | **이중 저장** | CSV 백업 + InfluxDB 시계열 저장 |
 | **실시간 대시보드** | Grafana 18개 패널로 시각화 |
 | **15년 히스토리** | 2010~2025년 118,312건 데이터 |
+| **데이터 품질** | 확정 일봉만 수집, `adj_close` 포함, 게시 지연은 `stale`로 표시 |
 
 ---
 
@@ -172,9 +173,8 @@ crontab -e
 ```
 
 ```cron
-0 8 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
-0 16 * * 1-5 /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
-0 20 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
+10 6 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
+40 15 * * 1-5 /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
 ```
 
 ---
@@ -245,3 +245,19 @@ MIT License
 
 - 작성일: 2025-11
 - 최종 수정: 2025-12-09
+
+---
+
+
+---
+
+<!-- DOC_UPDATE_2026-02-25 -->
+## 최신 운영 업데이트 (2026-02-25)
+- 백필 입력 파일을 조정해 조정종가 포함 CSV를 사용하도록 반영했습니다.
+- 15년 백필 재실행 완료: KR 83,968 / US 134,470 / FRED 19,275 / ECOS 445.
+- 운영 버킷과 분리해 검증 전용 버킷 `econ_market_backfill_2010_2025`를 신설했습니다.
+- 정합성 검증 스크립트 `01_scripts/09_validate_influx_integrity.py`를 추가했습니다.
+
+## 다음 권장 작업
+1. DQ 스크립트를 cron에 등록해 일일 리포트를 자동 생성
+2. Grafana에 운영/백필 버킷 전환 변수와 DQ 패널 추가

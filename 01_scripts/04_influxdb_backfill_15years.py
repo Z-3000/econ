@@ -49,7 +49,7 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 print("\n[1/4] 한국 주가 백필")
 print("-" * 80)
 
-kr_file = f"{DATA_DIR}/stock_kr_2010_2025.csv"
+kr_file = f"{DATA_DIR}/stock_kr_2010_2025_with_adj.csv"
 if os.path.exists(kr_file):
     kr_df = pd.read_csv(kr_file, encoding='utf-8-sig')
     kr_df['date'] = pd.to_datetime(kr_df['date'])
@@ -76,7 +76,9 @@ if os.path.exists(kr_file):
                     .field("high", float(row['high'])) \
                     .field("low", float(row['low'])) \
                     .field("close", float(row['close'])) \
+                    .field("adj_close", float(row.get('adj_close', row['close']))) \
                     .field("volume", int(row['volume'])) \
+                    .field("status_code", int(row.get('status_code', 1))) \
                     .time(dt, WritePrecision.S)
                 points.append(p)
             except Exception as e:
@@ -98,7 +100,7 @@ else:
 print("\n[2/4] 미국 주가 백필")
 print("-" * 80)
 
-us_file = f"{DATA_DIR}/stock_us_2010_2025.csv"
+us_file = f"{DATA_DIR}/stock_us_2010_2025_with_adj.csv"
 if os.path.exists(us_file):
     us_df = pd.read_csv(us_file, encoding='utf-8-sig')
     us_df['date'] = pd.to_datetime(us_df['date'])

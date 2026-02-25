@@ -307,3 +307,24 @@ econ/
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - 시스템 아키텍처
 - [DATA_SOURCE_POLICY.md](./DATA_SOURCE_POLICY.md) - 데이터 소스 정책
 - [PROGRESS.md](./PROGRESS.md) - 프로젝트 진행 상황
+
+---
+
+
+---
+
+<!-- DOC_UPDATE_2026-02-25 -->
+## 인벤토리 최신화 (2026-02-25)
+### 신규/변경 자산
+- 백필 입력 파일
+  - `00_data_raw/stock_kr_2010_2025_with_adj.csv`
+  - `00_data_raw/stock_us_2010_2025_with_adj.csv`
+- 정합성 리포트
+  - `98_logs/dq_econ_market.json`
+  - `98_logs/dq_econ_market_backfill_2010_2025.json`
+- 검증 스크립트
+  - `01_scripts/09_validate_influx_integrity.py`
+
+### 버킷 구분
+- 운영: `econ_market`
+- 백필 검증: `econ_market_backfill_2010_2025`

@@ -462,3 +462,15 @@ log_collection_result("stock", success=10, fail=0, execution_time_ms=execution_t
 
 *최종 업데이트: 2025-12-04*
 *작성자: Claude Code*
+
+---
+
+
+---
+
+<!-- DOC_UPDATE_2026-02-25 -->
+## 대시보드 설계 보완 (2026-02-25)
+- 데이터 무결성(DQ) 섹션을 별도 패널 그룹으로 추가 권장
+  - `missing_count`, `extra_count`, `nan_count` 지표
+- 버킷 선택 변수(`econ_market`, `econ_market_backfill_2010_2025`)를 도입해 동일 패널 재사용
+- 경제지표 패널은 `period=daily/monthly` 분리 시각화 적용

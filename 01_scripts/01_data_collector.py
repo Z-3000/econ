@@ -31,7 +31,8 @@ import time
 import requests
 import pandas as pd
 import yfinance as yf
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+import pytz
 
 # 설정 모듈에서 로드
 from config import config
@@ -66,6 +67,53 @@ os.makedirs(config.ECONOMY_DIR, exist_ok=True)
 def get_timestamp():
     """현재 타임스탬프 반환 (KST)"""
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def is_kr_ticker(ticker: str) -> bool:
+    """한국 시장 티커 여부 (.KS/.KQ/지수 ^KS/^KQ)"""
+    return ticker.endswith('.KS') or ticker.endswith('.KQ') or ticker.startswith('^K')
+
+
+def get_target_trade_date(is_kr: bool, now_utc: datetime) -> datetime.date:
+    """장 마감 여부에 따라 목표 거래일을 결정 (주말 보정 포함)"""
+    kst = now_utc.astimezone(pytz.timezone('Asia/Seoul'))
+    est = now_utc.astimezone(pytz.timezone('America/New_York'))
+
+    if is_kr:
+        # 한국 장 마감 15:30, 버퍼 10분
+        if kst.time() < datetime.strptime("15:40", "%H:%M").time():
+            target = kst.date() - timedelta(days=1)
+        else:
+            target = kst.date()
+    else:
+        # 미국 장 마감 16:00 ET, 버퍼 10분
+        if est.time() < datetime.strptime("16:10", "%H:%M").time():
+            target = est.date() - timedelta(days=1)
+        else:
+            target = est.date()
+
+    # 주말 보정 (휴일 캘린더 없으므로 토/일 → 최근 금요일)
+    while target.weekday() >= 5:  # 5=토,6=일
+        target -= timedelta(days=1)
+    return target
+
+
+def fetch_history_with_retry(ticker: str, period: str = "5d", max_retries: int = 3, delay: float = 2.0):
+    """일반 용도 히스토리 조회 (경제지표 등에서 사용)"""
+    for attempt in range(max_retries):
+        try:
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period=period)
+            if not hist.empty:
+                return hist, None
+            if attempt < max_retries - 1:
+                time.sleep(delay)
+        except Exception as e:
+            if attempt < max_retries - 1:
+                time.sleep(delay)
+            else:
+                return None, str(e)[:80]
+    return None, "no_data_after_retry"
 
 
 def clean_html(text):
@@ -246,28 +294,35 @@ def is_market_open_today():
     return kr_open, us_open
 
 
-def fetch_stock_with_retry(ticker: str, max_retries: int = 3, delay: float = 2.0):
-    """
-    yfinance 주가 수집 (재시도 로직 포함)
-
-    Args:
-        ticker: 종목 티커
-        max_retries: 최대 재시도 횟수
-        delay: 재시도 간 대기 시간 (초)
-
-    Returns:
-        tuple: (DataFrame or None, error_message or None)
-    """
+def fetch_stock_bar_with_retry(ticker: str, target_date, max_retries: int = 3, delay: float = 2.0):
+    """목표 거래일의 일봉을 가져오고, 없으면 상태와 함께 반환"""
     for attempt in range(max_retries):
         try:
             stock = yf.Ticker(ticker)
-            # period="5d"로 변경하여 최근 거래일 데이터 확보
-            hist = stock.history(period="5d")
+
+            start = target_date
+            end = target_date + timedelta(days=1)
+
+            hist = stock.history(start=start, end=end, interval="1d", auto_adjust=False)
+
+            # 백업: 최근 5일 조회 후 타겟 날짜 필터
+            if hist.empty:
+                hist = stock.history(period="5d", interval="1d", auto_adjust=False)
 
             if not hist.empty:
-                return hist, None
+                df = hist.reset_index()
+                df.rename(columns={'Date': 'date'}, inplace=True)
+                df['bar_date'] = pd.to_datetime(df['date']).dt.tz_localize(None).dt.date
 
-            # 데이터가 비어있으면 재시도
+                # 타겟 날짜 일치 여부
+                target_rows = df[df['bar_date'] == target_date]
+                if not target_rows.empty:
+                    return target_rows.iloc[-1], 'success', None
+
+                # 타겟 없음 → 가장 최신 행 반환 (stale)
+                latest = df.iloc[-1]
+                return latest, 'stale', None
+
             if attempt < max_retries - 1:
                 time.sleep(delay)
 
@@ -275,128 +330,130 @@ def fetch_stock_with_retry(ticker: str, max_retries: int = 3, delay: float = 2.0
             if attempt < max_retries - 1:
                 time.sleep(delay)
             else:
-                return None, str(e)[:50]
+                return None, 'error', str(e)[:80]
 
-    return None, "no_data_after_retry"
+    return None, 'no_data', 'no_data_after_retry'
 
 
 def collect_stock_data():
-    """
-    yfinance로 주가 데이터 수집
-
-    - 한국: 27개 종목 (지수 2 + ETF 9 + 개별 16)
-    - 미국: 41개 종목 (지수 3 + ETF 38)
-    - CSV 파일에 append
-    - InfluxDB에 저장
-    - 휴일/장 마감 시 별도 상태 표시
-    - 실패 시 최대 3회 재시도
-    """
+    """장마감 확정 일봉만 수집하고 당일 여부 검증"""
     print("\n[주가 수집]")
     start_time = time.time()
 
-    # 시장 오픈 여부 확인
-    kr_open, us_open = is_market_open_today()
-    if not kr_open:
-        print("  ℹ️ 오늘은 주말/휴일입니다 (한국 시장 휴장)")
-    if not us_open:
-        print("  ℹ️ 오늘은 주말/휴일입니다 (미국 시장 휴장)")
-
-    # 한국 + 미국 종목 병합
     all_tickers = {**config.KR_TICKERS, **config.US_TICKERS}
-    stock_data = []
+    stock_rows = []
     success_count = 0
     fail_count = 0
-    no_data_count = 0  # 휴장/데이터 없음 카운트
-    failed_tickers = []  # 실패한 종목 목록
+    stale_count = 0
+    failed_tickers = []
+
+    now_utc = datetime.now(timezone.utc)
 
     for name, ticker in all_tickers.items():
-        hist, error = fetch_stock_with_retry(ticker, max_retries=3, delay=1.5)
+        is_kr = is_kr_ticker(ticker)
+        target_date = get_target_trade_date(is_kr, now_utc)
 
-        if hist is not None and not hist.empty:
-            # 가장 최근 데이터 사용 (period="5d"이므로 마지막 행)
-            stock_data.append({
+        bar, status, error = fetch_stock_bar_with_retry(
+            ticker, target_date, max_retries=3, delay=2.0
+        )
+
+        if bar is not None and status == 'success':
+            stock_rows.append({
                 "timestamp": get_timestamp(),
+                "bar_date": target_date,
                 "name": name,
                 "ticker": ticker,
-                "open": hist["Open"].iloc[-1],
-                "high": hist["High"].iloc[-1],
-                "low": hist["Low"].iloc[-1],
-                "close": hist["Close"].iloc[-1],
-                "volume": int(hist["Volume"].iloc[-1]),
+                "open": float(bar['Open']),
+                "high": float(bar['High']),
+                "low": float(bar['Low']),
+                "close": float(bar['Close']),
+                "adj_close": float(bar.get('Adj Close', bar['Close'])),
+                "volume": int(bar['Volume']),
                 "status": "success"
             })
             success_count += 1
-        else:
-            # 실패 원인 구분
-            is_kr = ticker.endswith('.KS') or ticker.endswith('.KQ')
-            market_closed = (is_kr and not kr_open) or (not is_kr and not us_open)
-
-            if market_closed:
-                status = "market_closed"
-                no_data_count += 1
-            else:
-                status = f"error: {error}" if error else "no_data"
-                fail_count += 1
-                failed_tickers.append(f"{name}({ticker})")
-
-            stock_data.append({
+        elif bar is not None and status == 'stale':
+            stock_rows.append({
                 "timestamp": get_timestamp(),
-                "name": name, "ticker": ticker,
-                "open": "N/A", "high": "N/A", "low": "N/A", "close": "N/A", "volume": "N/A",
-                "status": status
+                "bar_date": bar['bar_date'],
+                "name": name,
+                "ticker": ticker,
+                "open": float(bar['Open']),
+                "high": float(bar['High']),
+                "low": float(bar['Low']),
+                "close": float(bar['Close']),
+                "adj_close": float(bar.get('Adj Close', bar['Close'])),
+                "volume": int(bar['Volume']),
+                "status": "stale"
+            })
+            stale_count += 1
+        else:
+            fail_count += 1
+            failed_tickers.append(f"{name}({ticker})")
+            stock_rows.append({
+                "timestamp": get_timestamp(),
+                "bar_date": target_date,
+                "name": name,
+                "ticker": ticker,
+                "open": "N/A",
+                "high": "N/A",
+                "low": "N/A",
+                "close": "N/A",
+                "adj_close": "N/A",
+                "volume": "N/A",
+                "status": f"error: {error or 'no_data'}"
             })
 
-    # 결과 출력
-    print(f"  수집 완료: {success_count}/{len(all_tickers)}개 종목")
-    if no_data_count > 0:
-        print(f"  ℹ️ 휴장 종목: {no_data_count}개")
-    if failed_tickers:
-        print(f"  ⚠️ 실패 종목: {', '.join(failed_tickers[:5])}" +
-              (f" 외 {len(failed_tickers)-5}개" if len(failed_tickers) > 5 else ""))
+    total = len(all_tickers)
+    print(f"  수집 완료: {success_count}/{total} 성공, {stale_count} 지연, {fail_count} 실패")
 
-    # CSV 저장
-    if stock_data:
-        df = pd.DataFrame(stock_data)
+    # CSV 저장 (bar_date + ticker 키 중복 제거 후 append)
+    if stock_rows:
+        df_new = pd.DataFrame(stock_rows)
         filepath = f"{config.STOCK_DIR}/stock.csv"
-        header = not os.path.exists(filepath)
-        df.to_csv(filepath, mode='a', header=header, index=False, encoding='utf-8-sig')
-        print(f"  CSV 저장: {len(stock_data)}건")
+        if os.path.exists(filepath):
+            df_old = pd.read_csv(filepath)
+            df = pd.concat([df_old, df_new], ignore_index=True)
+            df.drop_duplicates(subset=["bar_date", "ticker"], keep="last", inplace=True)
+        else:
+            df = df_new
+        df.to_csv(filepath, index=False, encoding='utf-8-sig')
+        print(f"  CSV 저장/갱신: {len(df_new)}건 (중복 제거 후 총 {len(df)}행)")
 
-        # InfluxDB 저장
+        # InfluxDB 저장 (성공+stale 모두 기록, status 필드 포함)
         points = []
-        for item in stock_data:
-            if item.get('status') != 'success':
-                continue
-            try:
-                dt = datetime.now(timezone.utc).replace(hour=12, minute=0, second=0, microsecond=0)
-                p = Point("stock_prices") \
-                    .tag("name", item['name']) \
-                    .tag("ticker", item['ticker']) \
-                    .field("open", float(item['open'])) \
-                    .field("high", float(item['high'])) \
-                    .field("low", float(item['low'])) \
-                    .field("close", float(item['close'])) \
-                    .field("volume", int(item['volume'])) \
-                    .time(dt, WritePrecision.S)
-                points.append(p)
-            except (ValueError, TypeError):
-                continue
+        for item in stock_rows:
+            if item.get('status') in ('success', 'stale'):
+                try:
+                    dt = datetime.combine(item['bar_date'], datetime.min.time()).replace(tzinfo=timezone.utc)
+                    p = Point("stock_prices") \
+                        .tag("name", item['name']) \
+                        .tag("ticker", item['ticker']) \
+                        .field("open", float(item['open'])) \
+                        .field("high", float(item['high'])) \
+                        .field("low", float(item['low'])) \
+                        .field("close", float(item['close'])) \
+                        .field("adj_close", float(item['adj_close'])) \
+                        .field("volume", int(item['volume'])) \
+                        .field("status_code", 1 if item['status'] == 'success' else 0) \
+                        .time(dt, WritePrecision.S)
+                    points.append(p)
+                except (ValueError, TypeError):
+                    continue
         write_to_influx(points, "주가")
 
-    # 수집 로그 저장
+    # 로그/알림
     execution_time_ms = int((time.time() - start_time) * 1000)
     log_collection_result("stock", success_count, fail_count, execution_time_ms)
 
-    # Telegram 알림용 결과 업데이트 (휴장 정보 포함)
     update_collection_result(
         "stock", success_count, fail_count, execution_time_ms,
-        no_data=no_data_count, failed_items=failed_tickers
+        no_data=stale_count, failed_items=failed_tickers,
+        delayed_items=[f"{row['name']} ({row['bar_date']})" for row in stock_rows if row.get('status') == 'stale']
     )
 
-    # 시장 정보 업데이트
-    global _collection_results
-    if not kr_open or not us_open:
-        _collection_results['market_info'] = '주말/휴일 (과거 데이터 사용)'
+    if stale_count > 0:
+        _collection_results['market_info'] = '일봉 게시 지연 발생'
 
 
 # =============================================================================
@@ -534,7 +591,7 @@ def collect_bok_data():
 
     for commodity_name, ticker in commodity_tickers.items():
         try:
-            hist, error = fetch_stock_with_retry(ticker, max_retries=2, delay=1.0)
+            hist, error = fetch_history_with_retry(ticker, max_retries=2, delay=1.0)
 
             if hist is not None and not hist.empty:
                 # 가장 최근 데이터 사용
@@ -606,14 +663,16 @@ def collect_bok_data():
                 date_str = str(item['date'])
                 if len(date_str) == 8:  # YYYYMMDD
                     dt = datetime.strptime(date_str, '%Y%m%d').replace(hour=12, tzinfo=timezone.utc)
+                    period_tag = "daily"
                 elif len(date_str) == 6:  # YYYYMM
                     dt = datetime.strptime(date_str + '01', '%Y%m%d').replace(hour=12, tzinfo=timezone.utc)
+                    period_tag = "monthly"
                 else:
                     continue
 
                 p = Point("economic_indicators") \
                     .tag("indicator", item['indicator']) \
-                    .tag("period", "daily") \
+                    .tag("period", period_tag) \
                     .field("value", float(item['value'])) \
                     .time(dt, WritePrecision.S)
                 points.append(p)
