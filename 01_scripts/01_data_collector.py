@@ -12,13 +12,13 @@
 
 실행 방법:
     # 가상환경 활성화 후 실행
-    source ~/influx_venv/bin/activate
-    python /WD4T/econ/01_scripts/data_collector.py
+    source .venv/bin/activate
+    python 01_scripts/01_data_collector.py
 
 Cron 스케줄:
-    0 8 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/data_collector.py
-    0 16 * * 1-5 /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/data_collector.py
-    0 20 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/data_collector.py
+    0 8 * * * cd /실제/프로젝트/경로/econ && ./.venv/bin/python 01_scripts/01_data_collector.py
+    0 16 * * 1-5 cd /실제/프로젝트/경로/econ && ./.venv/bin/python 01_scripts/01_data_collector.py
+    0 20 * * * cd /실제/프로젝트/경로/econ && ./.venv/bin/python 01_scripts/01_data_collector.py
 
 Author: [Your Name]
 Created: 2025-11

@@ -9,6 +9,7 @@ import pandas as pd
 from datetime import datetime, timezone
 from influxdb_client import InfluxDBClient, Point, WritePrecision
 from influxdb_client.client.write_api import SYNCHRONOUS
+from influxdb_client.rest import ApiException
 import os
 
 # ===========================
@@ -25,8 +26,8 @@ INFLUXDB_TOKEN = config.INFLUXDB_TOKEN
 INFLUXDB_ORG = config.INFLUXDB_ORG
 INFLUXDB_BUCKET = config.INFLUXDB_BUCKET
 
-# 배치 크기 (한 번에 적재할 레코드 수)
-BATCH_SIZE = config.BATCH_SIZE
+# 배치 크기 (백필은 일반 수집보다 더 작은 배치가 안정적)
+BATCH_SIZE = int(os.getenv("INFLUXDB_BACKFILL_BATCH_SIZE", "100"))
 
 print("=" * 80)
 print("15년 히스토리 데이터 InfluxDB 백필")
@@ -42,6 +43,26 @@ client = InfluxDBClient(
     timeout=60_000  # 타임아웃 60초로 설정
 )
 write_api = client.write_api(write_options=SYNCHRONOUS)
+
+
+def write_points_with_retry(points, depth=0):
+    """타임아웃 시 배치를 절반으로 쪼개 재시도"""
+    if not points:
+        return 0
+
+    try:
+        write_api.write(bucket=INFLUXDB_BUCKET, record=points)
+        return len(points)
+    except ApiException as e:
+        message = str(e).lower()
+        if "timeout" not in message or len(points) == 1:
+            raise
+
+        if depth == 0:
+            print(f"\n  ⚠️  write timeout 발생, 배치를 더 잘게 나눠 재시도합니다. ({len(points)}건)")
+
+        mid = len(points) // 2
+        return write_points_with_retry(points[:mid], depth + 1) + write_points_with_retry(points[mid:], depth + 1)
 
 # ===========================
 # 1. 한국 주가 백필
@@ -86,8 +107,7 @@ if os.path.exists(kr_file):
                 continue
 
         if points:
-            write_api.write(bucket=INFLUXDB_BUCKET, record=points)
-            total_written += len(points)
+            total_written += write_points_with_retry(points)
             print(f"  진행: {total_written:,}/{len(kr_df):,}건 ({total_written/len(kr_df)*100:.1f}%)", end='\r')
 
     print(f"\n✅ 한국 주가 백필 완료: {total_written:,}건")
@@ -134,8 +154,7 @@ if os.path.exists(us_file):
                 continue
 
         if points:
-            write_api.write(bucket=INFLUXDB_BUCKET, record=points)
-            total_written += len(points)
+            total_written += write_points_with_retry(points)
             print(f"  진행: {total_written:,}/{len(us_df):,}건 ({total_written/len(us_df)*100:.1f}%)", end='\r')
 
     print(f"\n✅ 미국 주가 백필 완료: {total_written:,}건")
@@ -178,8 +197,7 @@ if os.path.exists(fred_file):
                 continue
 
         if points:
-            write_api.write(bucket=INFLUXDB_BUCKET, record=points)
-            total_written += len(points)
+            total_written += write_points_with_retry(points)
             print(f"  진행: {total_written:,}/{len(fred_df):,}건 ({total_written/len(fred_df)*100:.1f}%)", end='\r')
 
     print(f"\n✅ FRED 경제지표 백필 완료: {total_written:,}건")
@@ -222,8 +240,7 @@ if os.path.exists(ecos_file):
                 continue
 
         if points:
-            write_api.write(bucket=INFLUXDB_BUCKET, record=points)
-            total_written += len(points)
+            total_written += write_points_with_retry(points)
             print(f"  진행: {total_written:,}/{len(ecos_df):,}건 ({total_written/len(ecos_df)*100:.1f}%)", end='\r')
 
     print(f"\n✅ ECOS 경제지표 백필 완료: {total_written:,}건")

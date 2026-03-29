@@ -9,13 +9,14 @@
 import pandas as pd
 import os
 from datetime import datetime
+from pathlib import Path
 
 # ===========================
 # 설정
 # ===========================
-BASE_DIR = "/WD4T/econ"
-ARCHIVE_DIR = f"{BASE_DIR}/00_data_raw/archive"
-OUTPUT_DIR = f"{BASE_DIR}/00_data_raw"
+BASE_DIR = Path(__file__).resolve().parent.parent
+ARCHIVE_DIR = BASE_DIR / "00_data_raw" / "archive"
+OUTPUT_DIR = BASE_DIR / "00_data_raw"
 
 print("=" * 80)
 print("15년 히스토리 데이터 병합")
@@ -28,16 +29,16 @@ print("\n[1/3] 한국 주가 병합")
 print("-" * 80)
 
 kr_files = [
-    f"{ARCHIVE_DIR}/stock_kr_2010_2014_v3.csv",
-    f"{ARCHIVE_DIR}/stock_kr_2015_2019_v3.csv",
-    f"{ARCHIVE_DIR}/stock_kr_2020_2025_v3.csv"
+    ARCHIVE_DIR / "stock_kr_2010_2014_v3.csv",
+    ARCHIVE_DIR / "stock_kr_2015_2019_v3.csv",
+    ARCHIVE_DIR / "stock_kr_2020_2025_v3.csv"
 ]
 
 kr_dfs = []
 for file in kr_files:
     if os.path.exists(file):
         df = pd.read_csv(file, encoding='utf-8-sig')
-        print(f"  읽기: {os.path.basename(file)} ({len(df):,}건)")
+        print(f"  읽기: {file.name} ({len(df):,}건)")
         kr_dfs.append(df)
     else:
         print(f"  ⚠️  파일 없음: {file}")
@@ -57,7 +58,7 @@ if len(kr_dfs) > 0:
     kr_merged = kr_merged.sort_values(['ticker', 'date']).reset_index(drop=True)
 
     # 저장
-    kr_output = f"{OUTPUT_DIR}/stock_kr_2010_2025.csv"
+    kr_output = OUTPUT_DIR / "stock_kr_2010_2025.csv"
     kr_merged.to_csv(kr_output, index=False, encoding='utf-8-sig')
 
     print(f"\n✅ 한국 주가 병합 완료")
@@ -77,16 +78,16 @@ print("\n[2/3] 미국 주가 병합")
 print("-" * 80)
 
 us_files = [
-    f"{ARCHIVE_DIR}/stock_us_2010_2014_v3.csv",
-    f"{ARCHIVE_DIR}/stock_us_2015_2019_v3.csv",
-    f"{ARCHIVE_DIR}/stock_us_2020_2025_v3.csv"
+    ARCHIVE_DIR / "stock_us_2010_2014_v3.csv",
+    ARCHIVE_DIR / "stock_us_2015_2019_v3.csv",
+    ARCHIVE_DIR / "stock_us_2020_2025_v3.csv"
 ]
 
 us_dfs = []
 for file in us_files:
     if os.path.exists(file):
         df = pd.read_csv(file, encoding='utf-8-sig')
-        print(f"  읽기: {os.path.basename(file)} ({len(df):,}건)")
+        print(f"  읽기: {file.name} ({len(df):,}건)")
         us_dfs.append(df)
     else:
         print(f"  ⚠️  파일 없음: {file}")
@@ -106,7 +107,7 @@ if len(us_dfs) > 0:
     us_merged = us_merged.sort_values(['ticker', 'date']).reset_index(drop=True)
 
     # 저장
-    us_output = f"{OUTPUT_DIR}/stock_us_2010_2025.csv"
+    us_output = OUTPUT_DIR / "stock_us_2010_2025.csv"
     us_merged.to_csv(us_output, index=False, encoding='utf-8-sig')
 
     print(f"\n✅ 미국 주가 병합 완료")
@@ -126,16 +127,16 @@ print("\n[3/4] FRED 경제지표 병합")
 print("-" * 80)
 
 fred_files = [
-    f"{ARCHIVE_DIR}/economy_fred_2010_2014_v3.csv",
-    f"{ARCHIVE_DIR}/economy_fred_2015_2019_v3.csv",
-    f"{ARCHIVE_DIR}/economy_fred_2020_2025_v3.csv"
+    ARCHIVE_DIR / "economy_fred_2010_2014_v3.csv",
+    ARCHIVE_DIR / "economy_fred_2015_2019_v3.csv",
+    ARCHIVE_DIR / "economy_fred_2020_2025_v3.csv"
 ]
 
 fred_dfs = []
 for file in fred_files:
     if os.path.exists(file):
         df = pd.read_csv(file, encoding='utf-8-sig')
-        print(f"  읽기: {os.path.basename(file)} ({len(df):,}건)")
+        print(f"  읽기: {file.name} ({len(df):,}건)")
         fred_dfs.append(df)
     else:
         print(f"  ⚠️  파일 없음: {file}")
@@ -155,7 +156,7 @@ if len(fred_dfs) > 0:
     fred_merged = fred_merged.sort_values(['series_id', 'date']).reset_index(drop=True)
 
     # 저장
-    fred_output = f"{OUTPUT_DIR}/economy_fred_2010_2025.csv"
+    fred_output = OUTPUT_DIR / "economy_fred_2010_2025.csv"
     fred_merged.to_csv(fred_output, index=False, encoding='utf-8-sig')
 
     print(f"\n✅ FRED 경제지표 병합 완료")
@@ -175,16 +176,16 @@ print("\n[4/4] ECOS 경제지표 병합")
 print("-" * 80)
 
 ecos_files = [
-    f"{ARCHIVE_DIR}/economy_ecos_2010_2014_v3.csv",
-    f"{ARCHIVE_DIR}/economy_ecos_2015_2019_v3.csv",
-    f"{ARCHIVE_DIR}/economy_ecos_2020_2025_v3.csv"
+    ARCHIVE_DIR / "economy_ecos_2010_2014_v3.csv",
+    ARCHIVE_DIR / "economy_ecos_2015_2019_v3.csv",
+    ARCHIVE_DIR / "economy_ecos_2020_2025_v3.csv"
 ]
 
 ecos_dfs = []
 for file in ecos_files:
     if os.path.exists(file):
         df = pd.read_csv(file, encoding='utf-8-sig')
-        print(f"  읽기: {os.path.basename(file)} ({len(df):,}건)")
+        print(f"  읽기: {file.name} ({len(df):,}건)")
         ecos_dfs.append(df)
     else:
         print(f"  ⚠️  파일 없음: {file}")
@@ -204,7 +205,7 @@ if len(ecos_dfs) > 0:
     ecos_merged = ecos_merged.sort_values(['series_id', 'date']).reset_index(drop=True)
 
     # 저장
-    ecos_output = f"{OUTPUT_DIR}/economy_ecos_2010_2025.csv"
+    ecos_output = OUTPUT_DIR / "economy_ecos_2010_2025.csv"
     ecos_merged.to_csv(ecos_output, index=False, encoding='utf-8-sig')
 
     print(f"\n✅ ECOS 경제지표 병합 완료")

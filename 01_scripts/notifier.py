@@ -174,9 +174,9 @@ class TelegramNotifier:
             for err in results.get('errors', [])[:3]:  # 최대 3개
                 message += f"• {err[:50]}\n"
 
-        message += """
+        message += f"""
 <code>─────────────────────</code>
-🔗 <a href="http://100.125.124.53:3000">Grafana 대시보드</a>
+🔗 <a href="{config.GRAFANA_URL}">Grafana 대시보드</a>
 """
 
         return self.send_message(message)

@@ -40,13 +40,13 @@ class Config:
     # ========================================
     # 경로 설정
     # ========================================
-    BASE_DIR = "/WD4T/econ"
-    DATA_DIR = f"{BASE_DIR}/00_data_raw"
-    PROCESSED_DIR = f"{BASE_DIR}/00-1_data_processed"
-    ARCHIVE_DIR = f"{BASE_DIR}/00_data_raw/archive"
-    NEWS_DIR = f"{BASE_DIR}/data/news"
-    STOCK_DIR = f"{BASE_DIR}/data/stock"
-    ECONOMY_DIR = f"{BASE_DIR}/data/economy"
+    BASE_DIR = str(Path(__file__).resolve().parent.parent)
+    DATA_DIR = str(Path(BASE_DIR) / "00_data_raw")
+    PROCESSED_DIR = str(Path(BASE_DIR) / "00-1_data_processed")
+    ARCHIVE_DIR = str(Path(BASE_DIR) / "00_data_raw" / "archive")
+    NEWS_DIR = str(Path(BASE_DIR) / "data" / "news")
+    STOCK_DIR = str(Path(BASE_DIR) / "data" / "stock")
+    ECONOMY_DIR = str(Path(BASE_DIR) / "data" / "economy")
 
     # ========================================
     # API 키 (환경변수에서 로드)

@@ -10,6 +10,8 @@ Grafana 대시보드 자동 생성 스크립트 v2
 """
 
 import json
+from pathlib import Path
+from config import config
 
 def create_dashboard():
     """
@@ -483,7 +485,8 @@ def main():
     dashboard = create_dashboard()
 
     # JSON 파일로 저장
-    output_file = "/WD4T/econ/03_outputs/grafana_dashboard_final.json"
+    base_dir = Path(__file__).resolve().parent.parent
+    output_file = base_dir / "03_outputs" / "grafana_dashboard_final.json"
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(dashboard, f, indent=2, ensure_ascii=False)
 
@@ -494,7 +497,7 @@ def main():
     print("  3행: 미국 금리(연방기금+10년물) | 환율+미국10년물")
     print("  4행: IT플랫폼 | 엔터/게임 | 대형주")
     print("\nGrafana 수동 import:")
-    print("  1. http://localhost:3000 접속")
+    print(f"  1. {config.GRAFANA_URL} 접속")
     print("  2. Dashboards > New > Import")
     print(f"  3. Upload: {output_file}")
     print("  4. InfluxDB 데이터소스 선택 > Import")

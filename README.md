@@ -10,7 +10,7 @@
 
 | 기능 | 설명 |
 |------|------|
-| **자동 수집** | Cron으로 하루 2회 (06:10/15:40, 장마감+버퍼) 자동 실행 |
+| **자동 수집** | Cron으로 하루 3회 (08:00, 16:00 평일, 20:00) 자동 실행 |
 | **이중 저장** | CSV 백업 + InfluxDB 시계열 저장 |
 | **실시간 대시보드** | Grafana 18개 패널로 시각화 |
 | **15년 히스토리** | 2010~2025년 118,312건 데이터 |
@@ -18,44 +18,104 @@
 
 ---
 
-## 시스템 아키텍처
+## 설치 및 실행
 
+### 1. 환경 설정
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                     라즈베리파이 5                                │
-│                                                                 │
-│  ┌────────────┐    ┌────────────┐    ┌────────────┐            │
-│  │   Cron     │───▶│  Python    │───▶│    CSV     │            │
-│  │ 08/16/20시 │    │ Collector  │    │   백업     │            │
-│  └────────────┘    └─────┬──────┘    └────────────┘            │
-│                          │                                      │
-│                          ▼                                      │
-│                   ┌────────────┐    ┌────────────┐             │
-│                   │  InfluxDB  │───▶│  Grafana   │             │
-│                   │ 118,312건  │    │ 18개 패널  │             │
-│                   └────────────┘    └────────────┘             │
-└─────────────────────────────────────────────────────────────────┘
-        ▲                    ▲
-        │                    │
-   ┌────┴────┐         ┌────┴────┐
-   │ yfinance │         │ECOS/FRED│
-   │  주가    │         │경제지표  │
-   └─────────┘         └─────────┘
+
+### 2. API 키 설정
+
+```bash
+# .env 파일 생성
+cp .env.example .env
+
+# .env 파일 편집
+nano .env
 ```
+
+```env
+NAVER_CLIENT_ID=your_id
+NAVER_CLIENT_SECRET=your_secret
+BOK_API_KEY=your_key
+FRED_API_KEY=your_key
+INFLUXDB_TOKEN=your_token
+```
+
+### 3. 데이터 수집 실행
+
+```bash
+source .venv/bin/activate
+
+# 일간 수집
+python 01_scripts/01_data_collector.py
+
+# 15년 히스토리 수집 (1회성)
+python 01_scripts/02_collect_15year_historical.py --start 2010-01-01 --end 2025-12-31 --suffix 2010_2025
+
+# InfluxDB 백필
+python 01_scripts/04_influxdb_backfill_15years.py
+
+# 환경 점검
+python 01_scripts/healthcheck.py
+```
+
+### 4. Cron 스케줄 설정
+
+```bash
+crontab -e
+```
+
+```cron
+0 8 * * * cd /실제/프로젝트/경로/econ && ./.venv/bin/python 01_scripts/01_data_collector.py >> 98_logs/cron.log 2>&1
+0 16 * * 1-5 cd /실제/프로젝트/경로/econ && ./.venv/bin/python 01_scripts/01_data_collector.py >> 98_logs/cron.log 2>&1
+0 20 * * * cd /실제/프로젝트/경로/econ && ./.venv/bin/python 01_scripts/01_data_collector.py >> 98_logs/cron.log 2>&1
+```
+
+## 이식 요약
+
+다른 기기나 다른 폴더로 옮길 때는 절대경로 `/WD4T/econ` 전제를 두지 않아도 되도록 코드를 정리해 두었습니다. 현재 실행 경로 기준으로 프로젝트 루트를 계산합니다.
+
+짧은 절차는 아래와 같습니다.
+
+```bash
+rsync -av /기존경로/econ/ /새경로/econ/
+cd /새경로/econ
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+python 01_scripts/healthcheck.py
+```
+
+라즈베리파이 OS가 Debian Trixie 기반이면 기본 `python3`가 3.13 계열일 수 있습니다.
+이 경우 `python3.12`를 따로 맞추기보다 `python3 -m venv .venv` 기준으로 진행하는 편이 안전합니다.
+
+문서 역할:
+
+- 빠른 이전 절차: [MIGRATION_ONEPAGE.md](MIGRATION_ONEPAGE.md)
+- 점검표: [MIGRATION_CHECKLIST.md](MIGRATION_CHECKLIST.md)
+- cron 등록: [CRONTAB_NEW_MACHINE.md](CRONTAB_NEW_MACHINE.md)
+- 실제 장애 대응 런북: [docs/MIGRATION_RUNBOOK_RASPI5_TRIXIE.md](docs/MIGRATION_RUNBOOK_RASPI5_TRIXIE.md)
+- 과거 상세 이관 기록: [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md)
 
 ---
 
-## 기술 스택
+## 최신 운영 업데이트 (2026-02-25)
 
-| 분류 | 기술 |
-|------|------|
-| **언어** | Python 3.12 |
-| **데이터 처리** | pandas, numpy |
-| **데이터 수집** | yfinance, requests |
-| **시계열 DB** | InfluxDB 2.x |
-| **시각화** | Grafana 12.3 |
-| **자동화** | Cron |
-| **하드웨어** | Raspberry Pi 5 |
+- 백필 입력 파일을 조정해 조정종가 포함 CSV를 사용하도록 반영했습니다.
+- 15년 백필 재실행 완료: KR 83,968 / US 134,470 / FRED 19,275 / ECOS 445.
+- 운영 버킷과 분리해 검증 전용 버킷 `econ_market_backfill_2010_2025`를 신설했습니다.
+- 정합성 검증 스크립트 `01_scripts/09_validate_influx_integrity.py`를 추가했습니다.
+
+## 다음 권장 작업
+
+1. DQ 스크립트를 cron에 등록해 일일 리포트를 자동 생성
+2. Grafana에 운영/백필 버킷 전환 변수와 DQ 패널 추가
 
 ---
 
@@ -90,92 +150,44 @@
 
 ---
 
-## 수집 데이터
+## 시스템 아키텍처
 
-### 주가 (68개 종목)
-
-| 구분 | 종목 수 | 예시 |
-|------|---------|------|
-| 한국 지수 | 2 | 코스피, 코스닥 |
-| 한국 ETF | 9 | KODEX200, TIGER 미국S&P500 등 |
-| 한국 개별 | 16 | 삼성전자, SK하이닉스, NAVER 등 |
-| 미국 지수 | 3 | S&P500, 나스닥, VIX |
-| 미국 ETF | 38 | QQQ, SPY, SCHD, TLT, GLD 등 |
-
-### 경제지표 (7종)
-
-| 출처 | 지표 |
-|------|------|
-| ECOS (한국은행) | 환율(원/달러, 원/엔, 원/유로), 기준금리, 콜금리 |
-| yfinance | WTI 유가(CL=F), 금 선물(GC=F) |
-| FRED (미국) | GDP, CPI, 실업률, 10년 국채금리 |
-
-### 데이터 규모
-
-| 항목 | 건수 |
-|------|------|
-| 한국 주가 | 64,190건 |
-| 미국 주가 | 32,016건 |
-| FRED 경제지표 | 19,275건 |
-| ECOS 경제지표 | 2,831건 |
-| **총합** | **118,312건** |
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     라즈베리파이 5                                │
+│                                                                 │
+│  ┌────────────┐    ┌────────────┐    ┌────────────┐            │
+│  │   Cron     │───▶│  Python    │───▶│    CSV     │            │
+│  │ 08/16/20시 │    │ Collector  │    │   백업     │            │
+│  └────────────┘    └─────┬──────┘    └────────────┘            │
+│                          │                                      │
+│                          ▼                                      │
+│                   ┌────────────┐    ┌────────────┐             │
+│                   │  InfluxDB  │───▶│  Grafana   │             │
+│                   │ 118,312건  │    │ 18개 패널  │             │
+│                   └────────────┘    └────────────┘             │
+└─────────────────────────────────────────────────────────────────┘
+        ▲                    ▲
+        │                    │
+   ┌────┴────┐         ┌────┴────┐
+   │ yfinance │         │ECOS/FRED│
+   │  주가    │         │경제지표  │
+   └─────────┘         └─────────┘
+```
 
 ---
 
-## 설치 및 실행
+## 기술 스택
 
-### 1. 환경 설정
-
-```bash
-# 가상환경 생성
-python -m venv ~/influx_venv
-source ~/influx_venv/bin/activate
-
-# 패키지 설치
-pip install pandas numpy yfinance requests influxdb-client python-dotenv fredapi
-```
-
-### 2. API 키 설정
-
-```bash
-# .env 파일 생성
-cp .env.example .env
-
-# .env 파일 편집
-nano .env
-```
-
-```env
-NAVER_CLIENT_ID=your_id
-NAVER_CLIENT_SECRET=your_secret
-BOK_API_KEY=your_key
-FRED_API_KEY=your_key
-INFLUXDB_TOKEN=your_token
-```
-
-### 3. 데이터 수집 실행
-
-```bash
-# 일간 수집
-python 01_scripts/01_data_collector.py
-
-# 15년 히스토리 수집 (1회성)
-python 01_scripts/02_collect_15year_historical.py --start 2010-01-01 --end 2025-12-31 --suffix 2010_2025
-
-# InfluxDB 백필
-python 01_scripts/04_influxdb_backfill_15years.py
-```
-
-### 4. Cron 스케줄 설정
-
-```bash
-crontab -e
-```
-
-```cron
-10 6 * * * /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
-40 15 * * 1-5 /home/raspi/influx_venv/bin/python /WD4T/econ/01_scripts/01_data_collector.py >> /WD4T/econ/98_logs/cron.log 2>&1
-```
+| 분류 | 기술 |
+|------|------|
+| **언어** | Python 3.x (`python3`, Trixie 기본 3.13) |
+| **데이터 처리** | pandas, numpy |
+| **데이터 수집** | yfinance, requests |
+| **시계열 DB** | InfluxDB 2.x |
+| **시각화** | Grafana 12.3 |
+| **자동화** | Cron |
+| **하드웨어** | Raspberry Pi 5 |
 
 ---
 
@@ -222,10 +234,46 @@ from(bucket: "econ_market")
 
 ---
 
+## 수집 데이터
+
+### 주가 (68개 종목)
+
+| 구분 | 종목 수 | 예시 |
+|------|---------|------|
+| 한국 지수 | 2 | 코스피, 코스닥 |
+| 한국 ETF | 9 | KODEX200, TIGER 미국S&P500 등 |
+| 한국 개별 | 16 | 삼성전자, SK하이닉스, NAVER 등 |
+| 미국 지수 | 3 | S&P500, 나스닥, VIX |
+| 미국 ETF | 38 | QQQ, SPY, SCHD, TLT, GLD 등 |
+
+### 경제지표 (7종)
+
+| 출처 | 지표 |
+|------|------|
+| ECOS (한국은행) | 환율(원/달러, 원/엔, 원/유로), 기준금리, 콜금리 |
+| yfinance | WTI 유가(CL=F), 금 선물(GC=F) |
+| FRED (미국) | GDP, CPI, 실업률, 10년 국채금리 |
+
+### 데이터 규모
+
+| 항목 | 건수 |
+|------|------|
+| 한국 주가 | 64,190건 |
+| 미국 주가 | 32,016건 |
+| FRED 경제지표 | 19,275건 |
+| ECOS 경제지표 | 2,831건 |
+| **총합** | **118,312건** |
+
+---
+
 ## 문서
 
 | 문서 | 설명 |
 |------|------|
+| [docs/MIGRATION_RUNBOOK_RASPI5_TRIXIE.md](docs/MIGRATION_RUNBOOK_RASPI5_TRIXIE.md) | Raspberry Pi 5 Trixie 마이그레이션 장애/복구 런북 |
+| [MIGRATION_ONEPAGE.md](MIGRATION_ONEPAGE.md) | 빠른 이전 절차 |
+| [MIGRATION_CHECKLIST.md](MIGRATION_CHECKLIST.md) | 이전 체크리스트 |
+| [CRONTAB_NEW_MACHINE.md](CRONTAB_NEW_MACHINE.md) | 새 기기 cron 등록 가이드 |
 | [ARCHITECTURE.md](99_docs/ARCHITECTURE.md) | 시스템 아키텍처 |
 | [DASHBOARD_DESIGN.md](99_docs/DASHBOARD_DESIGN.md) | 대시보드 설계 |
 | [DATA_SOURCE_POLICY.md](99_docs/DATA_SOURCE_POLICY.md) | 데이터 소스 정책 |
@@ -245,19 +293,3 @@ MIT License
 
 - 작성일: 2025-11
 - 최종 수정: 2025-12-09
-
----
-
-
----
-
-<!-- DOC_UPDATE_2026-02-25 -->
-## 최신 운영 업데이트 (2026-02-25)
-- 백필 입력 파일을 조정해 조정종가 포함 CSV를 사용하도록 반영했습니다.
-- 15년 백필 재실행 완료: KR 83,968 / US 134,470 / FRED 19,275 / ECOS 445.
-- 운영 버킷과 분리해 검증 전용 버킷 `econ_market_backfill_2010_2025`를 신설했습니다.
-- 정합성 검증 스크립트 `01_scripts/09_validate_influx_integrity.py`를 추가했습니다.
-
-## 다음 권장 작업
-1. DQ 스크립트를 cron에 등록해 일일 리포트를 자동 생성
-2. Grafana에 운영/백필 버킷 전환 변수와 DQ 패널 추가

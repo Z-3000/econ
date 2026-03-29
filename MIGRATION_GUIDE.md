@@ -1,5 +1,9 @@
 # 마이그레이션 가이드
 
+> 이 문서는 과거 이관 과정을 보존한 상세 기록이다.
+> 현재 기준 운영 절차는 [MIGRATION_ONEPAGE.md](MIGRATION_ONEPAGE.md), 실제 장애 대응과 Raspberry Pi 5 Trixie 복구 절차는 [docs/MIGRATION_RUNBOOK_RASPI5_TRIXIE.md](docs/MIGRATION_RUNBOOK_RASPI5_TRIXIE.md)를 우선 사용한다.
+> 아래 본문에는 과거 시점의 경로, 서비스 버전, 하드코딩 사례가 남아 있을 수 있다. 현재 사실로 바로 사용하지 말고 참고 기록으로만 본다.
+
 라즈베리파이 → 서버용 노트북 마이그레이션
 
 ---
@@ -91,14 +95,14 @@ git clone https://github.com/사용자/econ.git
 cd /원하는/경로/econ
 
 # 가상환경 생성
-python3.12 -m venv venv  # 또는 사용 중인 Python 버전을 명시적으로 지정
-# (필요시) python --version 으로 버전을 확인하고 맞추세요.
+python3 -m venv .venv
+# Trixie에서는 기본 python3가 3.13 계열일 수 있습니다.
 
 # 활성화 (Linux/Mac)
-source venv/bin/activate
+source .venv/bin/activate
 
 # 활성화 (Windows)
-venv\Scripts\activate
+.venv\Scripts\activate
 
 # 패키지 설치
 pip install -r requirements.txt
@@ -114,9 +118,11 @@ cp .env.example .env
 # 편집기로 API 키 입력
 ```
 
-### 3.3 경로 설정 (필수)
+### 3.3 경로 설정 (참고용)
 
-`/WD4T/econ` 경로가 코드 여러 곳에 하드코딩되어 있습니다. 새 경로가 다를 경우 **심볼릭 링크 방식을 권장**합니다.
+주의: 아래 내용은 과거 코드 기준 분석이다. 현재는 프로젝트 루트를 동적으로 계산하므로 `/WD4T/econ` 심볼릭 링크를 반드시 만들 필요는 없다.
+
+다만 문서 예시, cron 예시, 기타 운영 스크립트에는 `/WD4T/econ` 문자열이 남아 있을 수 있으므로 새 경로로 교체해 확인해야 합니다.
 
 **영향 받는 파일 목록 (5개)**
 
@@ -160,18 +166,10 @@ ls -la /WD4T/
 # - 01_scripts/05_create_grafana_dashboard_v2.py (output_file)
 ```
 
-### 3.4 Telegram 알림 Grafana 링크 수정 (필수)
+### 3.4 Grafana 외부 링크/공개 주소 (참고용)
 
-`01_scripts/notifier.py` 179번째 줄에 라즈베리파이의 IP 주소가 하드코딩되어 있습니다.
-심볼릭 링크로는 해결되지 않으므로 **코드를 직접 수정**해야 합니다.
-
-```python
-# 수정 전 (notifier.py:179)
-🔗 <a href="http://100.125.124.53:3000">Grafana 대시보드</a>
-
-# 수정 후 — 서버용 노트북의 IP로 변경
-🔗 <a href="http://새서버IP:3000">Grafana 대시보드</a>
-```
+현재 운영에서는 Grafana 내부 API 주소와 외부 공개 주소를 구분해 보는 편이 안전하다.
+이 구분과 실제 수정 사례는 런북 문서를 우선 참고한다.
 
 ### 3.5 필요한 API 키 목록
 | 서비스 | 환경변수 | 발급처 |
@@ -340,6 +338,12 @@ influx auth create --org my-org --all-access
 ---
 
 ## 업데이트 내역
+
+### 2026-03-29
+- 실행 영향이 큰 경로 하드코딩 4건 수정: `config.py`, `03_merge_historical_data.py`, `05_create_grafana_dashboard_v2.py`, `07_create_system_health_dashboard.py`
+- `healthcheck.py` 실행 예시를 상대경로 기준으로 수정
+- 간단 이식 문서 `MIGRATION_CHECKLIST.md` 추가
+- `README.md` 설치/cron 예시를 새 경로 기준으로 재작성
 
 ### 2026-02-25 (코드 검토 반영 — 2차)
 - **1.3 .env 백업** 주석 추가: rsync/scp 방법 사용 시 .env도 함께 전송되므로 백업·복원 단계 생략 가능, Git 방법 사용 시 필수라는 구분 안내 추가

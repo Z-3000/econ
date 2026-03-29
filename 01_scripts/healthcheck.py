@@ -9,8 +9,8 @@
 - 데이터 파일 존재 확인
 
 실행 방법:
-    source ~/influx_venv/bin/activate
-    python /WD4T/econ/01_scripts/healthcheck.py
+    source .venv/bin/activate
+    python 01_scripts/healthcheck.py
 """
 
 import os

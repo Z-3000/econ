@@ -13,9 +13,11 @@ Telegraf에서 수집한 라즈베리파이 리소스 모니터링
 import json
 import requests
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv('/WD4T/econ/.env')
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 GRAFANA_URL = os.getenv('GRAFANA_URL', 'http://localhost:3000')
 GRAFANA_USER = os.getenv('GRAFANA_USER', 'admin')
@@ -525,7 +527,7 @@ def main():
     dashboard = create_dashboard()
 
     # JSON 파일 저장
-    output_path = "/WD4T/econ/03_outputs/system_health_dashboard.json"
+    output_path = BASE_DIR / "03_outputs" / "system_health_dashboard.json"
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(dashboard, f, ensure_ascii=False, indent=2)
     print(f"\nJSON 저장: {output_path}")
